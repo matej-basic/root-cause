@@ -7,6 +7,7 @@ import style from "./login.module.css";
 function LoginFrom() {
   return (
     <Col sm={10} lg={4} className={style.form}>
+      <h1 className={style.heading}>Login</h1>
       <Form>
         <Form.Group className="mb-3">
           <Form.Label>Username</Form.Label>
