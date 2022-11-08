@@ -1,9 +1,11 @@
 import Link from "next/link";
-import { Container, Nav, Navbar } from "react-bootstrap";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
 
 function FLNavbar() {
   return (
-    <Navbar bg="primary" variant="dark">
+    <Navbar bg="primary" variant="dark" expand="lg">
       <Container fluid>
         <Link href="/" passHref>
           <Navbar.Brand>Forwarding Labs</Navbar.Brand>
