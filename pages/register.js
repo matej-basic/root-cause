@@ -1,5 +1,7 @@
 import Head from "next/head";
-import { Col, Container, Row } from "react-bootstrap";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
 import RegisterForm from "../components/Forms/register";
 
 function RegisterPage() {

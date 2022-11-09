@@ -17,7 +17,7 @@ function LoginFrom() {
           <Form.Label>Password</Form.Label>
           <Form.Control type="password" />
           <Form.Text className="text-muted">
-            <Link href="reset-password" passhref>
+            <Link href="forgot-password" passhref>
               <a>Forgot your password?</a>
             </Link>
           </Form.Text>
