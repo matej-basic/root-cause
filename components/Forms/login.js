@@ -1,0 +1,36 @@
+import Link from "next/link";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Form from "react-bootstrap/Form";
+import style from "./login.module.css";
+
+function LoginFrom() {
+  return (
+    <Col sm={10} lg={4} className={style.form}>
+      <h1 className={style.heading}>Login</h1>
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Username</Form.Label>
+          <Form.Control type="text" placeholder="E.g. john123" />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Password</Form.Label>
+          <Form.Control type="password" />
+          <Form.Text className="text-muted">
+            <Link href="forgot-password" passhref>
+              <a>Forgot your password?</a>
+            </Link>
+          </Form.Text>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Check type="checkbox" label="Stay logged in" />
+        </Form.Group>
+        <Button variant="secondary" type="submit">
+          Submit
+        </Button>
+      </Form>
+    </Col>
+  );
+}
+
+export default LoginFrom;
