@@ -19,6 +19,7 @@
 ### CVE-2022-41323
 
 ### CVE-2021-44026
+https://hub.docker.com/r/roundcube/roundcubemail/tags?page=4
 
 ### CVE-2021-39180
 
@@ -26,4 +27,5 @@
 https://www.youtube.com/watch?v=I4_ide0tEG8
 
 ### CVE-2022-42889
-
+https://github.com/korteke/CVE-2022-42889-POC
+https://hub.docker.com/r/korteke/text4shell
