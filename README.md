@@ -12,6 +12,7 @@
 - [CVE-2022-42889](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-42889)
 - [CVE-2022-21907](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-21907)
 - [CVE-2022-22965](https://nvd.nist.gov/vuln/detail/cve-2022-22965)
+- [CVE-2022-37454](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-37454)
 
 
 ### CVE-2022-32275
@@ -35,3 +36,6 @@ https://hub.docker.com/r/korteke/text4shell
 ### CVE-2022-21907
 
 ### CVE-2022-22965
+
+### CVE-2022-37454
+https://github.com/python/cpython/issues/98517
