@@ -1,0 +1,34 @@
+# Docker compose file for setting up all of the challenges for Penetration testing course
+# The project consists of 7 challenges in separate containers
+
+version: '2'
+
+services:
+
+  # Jura dodaj challenge_1 i challenge_7 
+
+
+  challenge_2: 
+    image: docker.io/matejbasic/cve-2022-0847:latest
+    ports: 
+      - "10001:22"
+
+  challenge_3: 
+    image: docker.io/matejbasic/cve-2022-1271:1.0
+    ports: 
+      - 10002:8080
+
+  challenge_4: 
+    image: docker.io/matejbasic/cve-2022-22965:latest
+    ports: 
+      - 10003:8080
+
+  challenge_5: 
+    image: docker.io/matejbasic/cve-2022-37454:1.0
+    ports: 
+      - 10004:8080
+
+  challenge_6: 
+    image: docker.io/matejbasic/cve-2022-42889:1.0
+    ports: 
+      - 10005:8080
