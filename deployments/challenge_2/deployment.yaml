@@ -30,5 +30,5 @@ spec:
   type: NodePort
   ports: 
     - port: 22
-      nodePort: 10001
+      nodePort: 30101
       targetPort: 22
