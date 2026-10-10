@@ -19,5 +19,6 @@ RUN npm run build
 
 ENV NODE_ENV=production
 
-# Push the schema to the attached Postgres, then start the server.
-CMD ["sh", "-c", "npx prisma db push && node dist/server.js"]
+# Push the schema to the attached Postgres, seed the challenges (idempotent
+# upserts; best-effort so a seed hiccup never blocks startup), then start.
+CMD ["sh", "-c", "npx prisma db push && (npm run seed || echo 'seed failed, continuing') && node dist/server.js"]
