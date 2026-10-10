@@ -1,7 +1,7 @@
 import { ShieldCheck } from "lucide-react";
 import { GitHubIcon } from "./GitHubIcon";
 
-const REPO_URL = "https://github.com/matej-basic/forwarding-labs";
+const REPO_URL = "https://github.com/matej-basic/root-cause";
 
 export function Footer() {
   return (
@@ -18,7 +18,7 @@ export function Footer() {
           className="inline-flex items-center gap-2 transition-colors hover:text-accent-strong"
         >
           <GitHubIcon className="h-4 w-4" />
-          github.com/matej-basic/forwarding-labs
+          github.com/matej-basic/root-cause
         </a>
       </div>
     </footer>

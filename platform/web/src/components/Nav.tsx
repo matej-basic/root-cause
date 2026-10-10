@@ -15,9 +15,9 @@ function Brand() {
       className="flex shrink-0 items-center gap-2.5 whitespace-nowrap font-display text-[17px] font-bold tracking-tight"
     >
       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-accent to-accent-strong font-mono text-[15px] font-bold text-[#04120c]">
-        fl
+        rc
       </span>
-      forwarding<span className="text-faint">-labs</span>
+      root<span className="text-faint"> cause</span>
     </Link>
   );
 }

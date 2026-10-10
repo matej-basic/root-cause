@@ -1,6 +1,6 @@
-# forwarding-labs API
+# Root Cause API
 
-Backend for the forwarding-labs CTF platform. Fastify v5 on Node 24, Prisma on
+Backend for the Root Cause CTF platform. Fastify v5 on Node 24, Prisma on
 Postgres, GitHub OAuth with a stateless bearer JWT. The authoritative spec is
 `../API_CONTRACT.md`; this README covers how to run it.
 

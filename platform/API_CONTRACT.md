@@ -7,9 +7,9 @@ to change the contract, change this file first.
 ## Hosting model
 
 - Frontend: Next.js (App Router) on Vercel, origin `WEB_ORIGIN`
-  (e.g. `https://forwarding-labs.vercel.app`).
+  (e.g. `https://root-cause-ctf.vercel.app`).
 - Backend: Fastify on Railway, origin `API_ORIGIN`
-  (e.g. `https://forwarding-labs-api.up.railway.app`), Postgres attached.
+  (e.g. `https://root-cause-production-3c05.up.railway.app`), Postgres attached.
 - Different domains, so auth uses a **bearer JWT**, not cookies. The frontend
   stores the token and sends `Authorization: Bearer <jwt>` on authenticated
   requests. No third-party cookies.

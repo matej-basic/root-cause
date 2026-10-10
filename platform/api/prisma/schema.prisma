@@ -1,4 +1,4 @@
-// Prisma schema for the forwarding-labs CTF platform API.
+// Prisma schema for the Root Cause CTF platform API.
 // Deployment uses `prisma db push` (no migration files are kept in the repo).
 
 generator client {

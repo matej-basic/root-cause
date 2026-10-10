@@ -2,7 +2,7 @@
 board: done
 ---
 
-# forwarding-labs web platform
+# Root Cause web platform
 
 Turn the existing CTF challenge set into a hosted platform: Next.js frontend on
 Vercel, Fastify + Postgres API on Railway, GitHub OAuth login, flag submission,
@@ -10,7 +10,7 @@ and a points leaderboard. Scope is the core platform. Ephemeral per-user
 challenge containers (the AWS/Fargate provisioner from the brainstorm) are left
 as documented future work.
 
-Live: https://forwarding-labs.vercel.app (web), https://forwarding-labs-production.up.railway.app (API).
+Live: https://root-cause-ctf.vercel.app (web), https://root-cause-production-3c05.up.railway.app (API).
 
 ## Tasks
 

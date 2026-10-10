@@ -1,8 +1,8 @@
 {
-  "name": "forwarding-labs-api",
+  "name": "root-cause-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Backend API for the forwarding-labs CTF platform",
+  "description": "Backend API for the Root Cause CTF platform",
   "type": "module",
   "engines": {
     "node": ">=24"

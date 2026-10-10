@@ -1,11 +1,11 @@
-# forwarding-labs platform
+# Root Cause platform
 
 A hosted CTF platform for the challenge set in this repo. Pick a challenge,
 exploit the real CVE, submit the flag, and climb a points leaderboard. Sign-in
 is one click with GitHub.
 
-- Play: https://forwarding-labs.vercel.app
-- API: https://forwarding-labs-production.up.railway.app
+- Play: https://root-cause-ctf.vercel.app
+- API: https://root-cause-production-3c05.up.railway.app
 
 ## What it does
 

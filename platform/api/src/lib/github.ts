@@ -18,7 +18,7 @@ export async function exchangeCodeForToken(code: string): Promise<string> {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      'User-Agent': 'forwarding-labs',
+      'User-Agent': 'root-cause',
     },
     body: JSON.stringify({
       client_id: requireEnv('GITHUB_CLIENT_ID'),
@@ -50,7 +50,7 @@ export async function fetchGitHubUser(accessToken: string): Promise<GitHubUser> 
     headers: {
       Authorization: `Bearer ${accessToken}`,
       Accept: 'application/vnd.github+json',
-      'User-Agent': 'forwarding-labs',
+      'User-Agent': 'root-cause',
     },
   });
 

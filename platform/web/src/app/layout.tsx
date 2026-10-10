@@ -19,8 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "forwarding-labs · hands-on CTF against real CVEs",
-    template: "%s · forwarding-labs",
+    default: "Root Cause · hands-on CTF against real CVEs",
+    template: "%s · Root Cause",
   },
   description:
     "A hands-on capture-the-flag built on real historical CVEs. Each challenge is a deliberately vulnerable app in its own sandboxed lab. Exploit the bug, submit the flag, climb the leaderboard.",

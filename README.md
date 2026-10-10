@@ -9,8 +9,8 @@ packaged so students can exploit it in a sandboxed lab.
 The challenges are wrapped in a hosted platform: a challenge catalog, GitHub
 sign-in, flag submission, and a points leaderboard.
 
-- Play: https://forwarding-labs.vercel.app
-- API: https://forwarding-labs-production.up.railway.app
+- Play: https://root-cause-ctf.vercel.app
+- API: https://root-cause-production-3c05.up.railway.app
 - Code and setup: [`platform/`](platform/README.md)
 
 It is a Next.js app on Vercel talking to a Fastify + Postgres API on Railway.
