@@ -1,0 +1,152 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Midnight palette — single emerald accent on calm slate.
+   Tokens are consumed by tailwind.config.ts via var(--*).
+   ============================================================ */
+:root {
+  --bg: #0b0f14;
+  --surface: #121823;
+  --surface-2: #171f2b;
+  --border: #1f2937;
+  --border-strong: #2c3a49;
+
+  --fg: #e6edf4;
+  --muted: #9aa7b5;
+  --faint: #697585;
+
+  --accent: #10b981;
+  --accent-strong: #34d399;
+  --accent-soft: rgba(16, 185, 129, 0.12);
+
+  --danger: #ff8a9c;
+  --warn: #ffcf5f;
+
+  --gold: #f4c84a;
+  --silver: #cdd7e3;
+  --bronze: #e09a63;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    background-color: var(--bg);
+  }
+
+  body {
+    background:
+      radial-gradient(1100px 440px at 72% -12%, rgba(16, 185, 129, 0.08), transparent 60%),
+      var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: rgba(16, 185, 129, 0.28);
+  }
+
+  /* Visible, consistent keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  a {
+    color: inherit;
+  }
+}
+
+/* ============================================================
+   Rendered markdown (challenge descriptions). react-markdown
+   output is wrapped in .md; raw HTML is NOT enabled.
+   ============================================================ */
+.md {
+  color: var(--fg);
+  font-size: 0.975rem;
+  line-height: 1.75;
+}
+.md > *:first-child {
+  margin-top: 0;
+}
+.md h2 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 1.8rem 0 0.7rem;
+  color: var(--fg);
+}
+.md h3 {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 1.4rem 0 0.5rem;
+  color: var(--fg);
+}
+.md p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+.md a {
+  color: var(--accent-strong);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.md strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.md ul,
+.md ol {
+  margin: 0 0 1rem;
+  padding-left: 1.35rem;
+  color: var(--muted);
+}
+.md li {
+  margin: 0.3rem 0;
+}
+.md li::marker {
+  color: var(--faint);
+}
+.md code {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.86em;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.1em 0.38em;
+  color: var(--accent-strong);
+}
+.md pre {
+  background: #0c1118;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  overflow-x: auto;
+  margin: 0 0 1.1rem;
+}
+.md pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #c6d2de;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.md blockquote {
+  border-left: 3px solid var(--border-strong);
+  margin: 0 0 1rem;
+  padding: 0.2rem 0 0.2rem 1rem;
+  color: var(--muted);
+}
+.md hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 1.6rem 0;
+}
