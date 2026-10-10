@@ -4,6 +4,19 @@ An educational Capture-the-Flag set for a university penetration-testing course.
 Each challenge is a deliberately vulnerable app built around a historical CVE,
 packaged so students can exploit it in a sandboxed lab.
 
+## Live platform
+
+The challenges are wrapped in a hosted platform: a challenge catalog, GitHub
+sign-in, flag submission, and a points leaderboard.
+
+- Play: https://forwarding-labs.vercel.app
+- API: https://forwarding-labs-production.up.railway.app
+- Code and setup: [`platform/`](platform/README.md)
+
+It is a Next.js app on Vercel talking to a Fastify + Postgres API on Railway.
+Flags are stored as SHA-256 hashes; the vulnerable apps below are what you
+exploit to recover them.
+
 ## Challenges (built and deployed)
 
 Six challenges exist as runnable images and Kubernetes manifests. The
