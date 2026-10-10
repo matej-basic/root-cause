@@ -1,0 +1,80 @@
+// Prisma schema for the forwarding-labs CTF platform API.
+// Deployment uses `prisma db push` (no migration files are kept in the repo).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Category {
+  web
+  pwn
+  crypto
+  misc
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+model User {
+  id        String   @id @default(cuid())
+  githubId  String   @unique
+  username  String
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+
+  solves      Solve[]
+  submissions Submission[]
+}
+
+model Challenge {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  cveId       String
+  category    Category
+  difficulty  Difficulty
+  points      Int
+  summary     String
+  description String
+  flagHash    String?
+  order       Int
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+
+  solves      Solve[]
+  submissions Submission[]
+}
+
+model Solve {
+  id          String   @id @default(cuid())
+  userId      String
+  challengeId String
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+
+  @@unique([userId, challengeId])
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  userId      String
+  challengeId String
+  correct     Boolean
+  createdAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+
+  @@index([userId, challengeId])
+}
