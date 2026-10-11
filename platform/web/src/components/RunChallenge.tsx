@@ -96,8 +96,12 @@ export function RunChallenge({ slug, image }: { slug: string; image: string }) {
       </div>
 
       <p className="mt-5 text-sm text-muted">
-        The rootcause CLI does all of this in one command. Running a challenge needs your
-        API key, which you generate in your{" "}
+        The{" "}
+        <Link href="/cli" className="font-semibold text-accent-strong hover:underline">
+          rootcause CLI
+        </Link>{" "}
+        does all of this in one command. Running a challenge needs your API key, which you
+        generate in your{" "}
         <Link href="/profile" className="font-semibold text-accent-strong hover:underline">
           profile
         </Link>
