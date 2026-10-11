@@ -130,7 +130,7 @@ const challenges: SeedChallenge[] = [
       '',
       'Run the challenge locally with its docker-compose. The flagger sidecar writes your per-run flag into the container before it starts. The app is at `http://localhost:8080/blogposts/`.',
     ].join('\n'),
-    image: 'matejbasic/cve-2022-22965',
+    image: 'matejbasic/cve-2022-22965:1.0',
     flagHash: null,
     dynamic: true,
   },
@@ -154,7 +154,7 @@ const challenges: SeedChallenge[] = [
       '',
       'This is an SSH challenge, not an HTTP one. Log in as the `baker` user over SSH.',
     ].join('\n'),
-    image: 'matejbasic/cve-2022-0847',
+    image: 'matejbasic/cve-2022-0847:1.0',
     // Still static and pending a kernel test on the self-host target, so it is
     // held out of the catalog until the per-run flag path is validated for it.
     flagHash: '6839bdcabc934ec34c6e46b9bee43d8373c2d71dc55a1d9ccfe9e22da4579e76',

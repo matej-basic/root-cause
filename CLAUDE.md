@@ -26,7 +26,7 @@ The live catalog is four app-level challenges, all dynamic (a per-run flag per a
 | Slug | CVE dir | Vulnerability | Image |
 |---|---|---|---|
 | zgrep-rce | CVE-2022-1271 | zgrep arbitrary file write / RCE | `matejbasic/cve-2022-1271:1.0` |
-| spring4shell | CVE-2022-22965 | Spring4Shell RCE (Tomcat WAR) | `matejbasic/cve-2022-22965` |
+| spring4shell | CVE-2022-22965 | Spring4Shell RCE (Tomcat WAR) | `matejbasic/cve-2022-22965:1.0` |
 | sha3-overflow | CVE-2022-37454 | SHA-3 (Keccak) buffer overflow | `matejbasic/cve-2022-37454:1.0` |
 | text4shell | CVE-2022-42889 | Text4Shell RCE in Commons Text | `matejbasic/cve-2022-42889:1.0` |
 

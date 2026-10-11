@@ -104,7 +104,7 @@ When zgrep processes that name, your command runs. Use it to read the flag off t
     active: true,
     solveCount: 0,
     solved: false,
-    image: "matejbasic/cve-2022-22965",
+    image: "matejbasic/cve-2022-22965:1.0",
     summary:
       "Exploit Spring's data binding on a WAR-deployed app to drop a web shell and run commands on the server.",
     description: `## The bug

@@ -157,7 +157,7 @@ dropped.
 | zgrep-rce | CVE-2022-1271 | zgrep arbitrary file write | misc | medium | 200 | `matejbasic/cve-2022-1271:1.0` | yes | yes |
 | sha3-overflow | CVE-2022-37454 | SHA-3 buffer overflow | crypto | medium | 300 | `matejbasic/cve-2022-37454:1.0` | yes | yes |
 | text4shell | CVE-2022-42889 | Text4Shell RCE | web | medium | 300 | `matejbasic/cve-2022-42889:1.0` | yes | yes |
-| spring4shell | CVE-2022-22965 | Spring4Shell RCE | web | hard | 400 | `matejbasic/cve-2022-22965` | yes | yes |
+| spring4shell | CVE-2022-22965 | Spring4Shell RCE | web | hard | 400 | `matejbasic/cve-2022-22965:1.0` | yes | yes |
 | dirty-pipe | CVE-2022-0847 | Dirty Pipe | pwn | hard | 500 | `matejbasic/cve-2022-0847` | no | no |
 
 Descriptions are drawn from each `CVE-*/README.md` (vulnerability description
@@ -172,7 +172,7 @@ image differ. The flagger sidecar is always the same image.
 ```yaml
 services:
   flagger:
-    image: matejbasic/rootcause-flagger:latest
+    image: matejbasic/rootcause-flagger:1.0
     environment:
       ROOTCAUSE_API_URL: https://root-cause-api.matejbasic.com
       ROOTCAUSE_API_KEY: ${ROOTCAUSE_API_KEY}

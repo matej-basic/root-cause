@@ -33,7 +33,7 @@ flag was produced.
 ## Build
 
 ```bash
-docker build -t matejbasic/rootcause-flagger:latest ./sidecar
+docker build -t matejbasic/rootcause-flagger:1.0 ./sidecar
 ```
 
 The build is multi-stage: it compiles a static, CGO-free binary on
@@ -50,7 +50,7 @@ only the slug and the challenge image change per challenge.
 ```yaml
 services:
   flagger:
-    image: matejbasic/rootcause-flagger:latest
+    image: matejbasic/rootcause-flagger:1.0
     environment:
       ROOTCAUSE_API_URL: https://root-cause-api.matejbasic.com
       ROOTCAUSE_API_KEY: ${ROOTCAUSE_API_KEY}

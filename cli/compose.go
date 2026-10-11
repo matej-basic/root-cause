@@ -9,7 +9,7 @@ import (
 
 // flaggerImage is fixed for every challenge: the one-shot sidecar that mints a
 // per-run flag and writes it to the shared volume at /flag/flag.txt.
-const flaggerImage = "matejbasic/rootcause-flagger:latest"
+const flaggerImage = "matejbasic/rootcause-flagger:1.0"
 
 // slugRe constrains a slug to a safe path segment so it can be used in cache
 // paths and the compose without traversal or shell surprises.

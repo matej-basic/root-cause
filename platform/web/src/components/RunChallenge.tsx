@@ -13,7 +13,7 @@ import { CopyButton } from "./CopyButton";
 function composeFor(slug: string, image: string): string {
   return `services:
   flagger:
-    image: matejbasic/rootcause-flagger:latest
+    image: matejbasic/rootcause-flagger:1.0
     environment:
       ROOTCAUSE_API_URL: https://root-cause-api.matejbasic.com
       ROOTCAUSE_API_KEY: \${ROOTCAUSE_API_KEY}
