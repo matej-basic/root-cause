@@ -1,0 +1,48 @@
+name: cli-release
+
+# Cross-compile the rootcause CLI and publish the binaries to a GitHub Release.
+# Trigger by pushing a tag like `cli-v1.0.0`:
+#   git tag cli-v1.0.0 && git push origin cli-v1.0.0
+
+on:
+  push:
+    tags:
+      - 'cli-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build ${{ matrix.goos }}/${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - { goos: linux, goarch: amd64 }
+          - { goos: linux, goarch: arm64 }
+          - { goos: darwin, goarch: amd64 }
+          - { goos: darwin, goarch: arm64 }
+          - { goos: windows, goarch: amd64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: Build
+        working-directory: cli
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          out="rootcause-${GOOS}-${GOARCH}"
+          [ "$GOOS" = windows ] && out="${out}.exe"
+          go build -trimpath -ldflags "-s -w" -o "$out" .
+          echo "ASSET=cli/$out" >> "$GITHUB_ENV"
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ASSET }}
+          fail_on_unmatched_files: true
