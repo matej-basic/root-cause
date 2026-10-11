@@ -6,22 +6,33 @@ Submitting flags stays on the website. There is no `submit` command here.
 
 ## Install
 
-With a Go toolchain:
+Download the prebuilt binary for your platform from the [latest release](https://github.com/matej-basic/root-cause/releases/latest) and put it on your PATH.
+
+macOS / Linux:
 
 ```bash
-go install github.com/matej-basic/root-cause/cli@latest
+os=$(uname -s | tr '[:upper:]' '[:lower:]')
+arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+curl -fsSL -o rootcause "https://github.com/matej-basic/root-cause/releases/latest/download/rootcause-${os}-${arch}"
+chmod +x rootcause && sudo mv rootcause /usr/local/bin/
 ```
 
-The binary installs as `cli`. Rename or symlink it to `rootcause` if you want the shorter name on your PATH.
+Windows: download `rootcause-windows-amd64.exe` from the [releases page](https://github.com/matej-basic/root-cause/releases/latest) and add it to your PATH.
 
-Prebuilt binaries will be attached to GitHub Releases, and a `curl | sh` installer is planned. Until then, `go install` or a local build is the way in:
+Releases are cut by pushing a `cli-v*` tag, which runs `.github/workflows/cli-release.yml` to cross-compile and attach the binaries.
+
+### From source
+
+No third-party dependencies (pure Go standard library), so a local build is just:
 
 ```bash
 cd cli
 go build -o rootcause .
 ```
 
-No third-party dependencies. The CLI is pure Go standard library and shells out to `docker` for the compose work, so you need Docker installed and running to use `start`, `stop`, and `status`.
+(`go install github.com/matej-basic/root-cause/cli@latest` also works, but names the binary `cli`.)
+
+You need Docker installed and running to use `start`, `stop`, and `status`.
 
 ## Usage
 
