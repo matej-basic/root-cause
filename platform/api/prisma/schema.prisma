@@ -47,8 +47,10 @@ model Challenge {
   points      Int
   summary     String
   description String
-  // Published image name students pull in the self-host compose.
-  image       String
+  // Published image name students pull in the self-host compose. Defaults to ""
+  // so `prisma db push` can add the column to existing rows without data loss;
+  // the seed sets the real values.
+  image       String     @default("")
   // sha256 hex of the static flag; null for challenges validated per-run.
   // Ignored when `dynamic` is true.
   flagHash    String?
