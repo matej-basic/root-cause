@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 
 /**
  * Hash a submitted flag the same way the seed hashes the canonical flag:
@@ -14,4 +14,26 @@ export function hashFlag(flag: string): string {
  */
 export function checkFlag(submitted: string, flagHash: string): boolean {
   return hashFlag(submitted) === flagHash;
+}
+
+/**
+ * True when the submitted flag matches any of the given hashes. Dynamic
+ * challenges validate against every flag ever issued to the user for that
+ * challenge (one per instance), so re-deploying and solving an earlier
+ * instance both count.
+ */
+export function checkFlagAgainst(submitted: string, flagHashes: string[]): boolean {
+  const h = hashFlag(submitted);
+  return flagHashes.includes(h);
+}
+
+/**
+ * Mint a fresh per-instance flag. Returns the raw flag (to inject into the
+ * container as its FLAG, never persisted) and its hash (stored on the
+ * Instance row for later validation). 96 bits of entropy, so a flag cannot be
+ * guessed or shared usefully across users.
+ */
+export function generateDynamicFlag(): { flag: string; flagHash: string } {
+  const flag = `flag{${randomBytes(12).toString('hex')}}`;
+  return { flag, flagHash: hashFlag(flag) };
 }

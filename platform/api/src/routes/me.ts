@@ -17,12 +17,20 @@ export async function meRoutes(app: FastifyInstance): Promise<void> {
       orderBy: { createdAt: 'asc' },
     });
 
+    // plan and subscriptionActive live on the DB row, not in the JWT.
+    const account = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { plan: true, subscriptionActive: true },
+    });
+
     return {
       user: {
         id: user.id,
         username: user.username,
         name: user.name,
         avatarUrl: user.avatarUrl,
+        plan: account?.plan ?? 'free',
+        subscriptionActive: account?.subscriptionActive ?? false,
       },
       stats: {
         points: mine?.points ?? 0,

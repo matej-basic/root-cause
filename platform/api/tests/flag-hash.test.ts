@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { hashFlag, checkFlag } from '../src/lib/flag-hash.js';
+import {
+  hashFlag,
+  checkFlag,
+  checkFlagAgainst,
+  generateDynamicFlag,
+} from '../src/lib/flag-hash.js';
 
 // No real challenge flags appear here; these are arbitrary test tokens.
 describe('flag hashing', () => {
@@ -26,5 +31,37 @@ describe('flag hashing', () => {
     const h = hashFlag('CaseSensitive');
     expect(checkFlag('casesensitive', h)).toBe(false);
     expect(checkFlag('CaseSensitive', h)).toBe(true);
+  });
+});
+
+describe('dynamic flags', () => {
+  it('generates a flag in the expected format with a matching hash', () => {
+    const { flag, flagHash } = generateDynamicFlag();
+    expect(flag).toMatch(/^flag\{[0-9a-f]{24}\}$/);
+    expect(flagHash).toBe(hashFlag(flag));
+  });
+
+  it('generates a different flag on every call', () => {
+    const a = generateDynamicFlag();
+    const b = generateDynamicFlag();
+    expect(a.flag).not.toBe(b.flag);
+    expect(a.flagHash).not.toBe(b.flagHash);
+  });
+});
+
+describe('checkFlagAgainst', () => {
+  const hashes = [hashFlag('token-one'), hashFlag('token-two')];
+
+  it('accepts a flag whose hash is in the list', () => {
+    expect(checkFlagAgainst('token-one', hashes)).toBe(true);
+    expect(checkFlagAgainst('  token-two\n', hashes)).toBe(true);
+  });
+
+  it('rejects a flag whose hash is not in the list', () => {
+    expect(checkFlagAgainst('token-three', hashes)).toBe(false);
+  });
+
+  it('rejects everything for an empty list', () => {
+    expect(checkFlagAgainst('token-one', [])).toBe(false);
   });
 });

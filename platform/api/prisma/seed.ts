@@ -15,6 +15,14 @@ interface SeedChallenge {
   // sha256 hex of the canonical flag, or null to disable submissions.
   // Raw flag strings never appear in this file.
   flagHash: string | null;
+  // v2 hosting. `hostable`: the platform can spin up a per-user instance.
+  // `dynamic`: that instance gets its own random flag, so `submit` validates
+  // against the instance flag instead of `flagHash`. Both default off; flip a
+  // challenge on only once its container reads FLAG from the environment and
+  // the orchestrator can deploy it. A dynamic challenge with no live instance
+  // rejects submissions, so do not enable `dynamic` before hosting works.
+  hostable?: boolean;
+  dynamic?: boolean;
 }
 
 const challenges: SeedChallenge[] = [
@@ -183,6 +191,8 @@ async function main(): Promise<void> {
         summary: c.summary,
         description: c.description,
         flagHash: c.flagHash,
+        hostable: c.hostable ?? false,
+        dynamic: c.dynamic ?? false,
         active: true,
       },
       create: {
@@ -196,6 +206,8 @@ async function main(): Promise<void> {
         summary: c.summary,
         description: c.description,
         flagHash: c.flagHash,
+        hostable: c.hostable ?? false,
+        dynamic: c.dynamic ?? false,
         active: true,
       },
     });

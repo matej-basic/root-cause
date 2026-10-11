@@ -3,7 +3,8 @@ import type { Challenge } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getPrisma } from '../lib/prisma.js';
-import { checkFlag } from '../lib/flag-hash.js';
+import { checkFlag, checkFlagAgainst } from '../lib/flag-hash.js';
+import { userFlagHashesFor } from '../lib/instances.js';
 import { verifyAppToken } from '../lib/jwt.js';
 import { optionalAuth, requireAuth } from '../lib/auth-hooks.js';
 
@@ -134,12 +135,24 @@ export async function challengeRoutes(app: FastifyInstance): Promise<void> {
       if (!challenge || !challenge.active) {
         return reply.code(404).send({ error: 'not_found' });
       }
-      if (!challenge.flagHash) {
-        return reply.code(422).send({ error: 'submissions_disabled' });
-      }
 
       const userId = request.user!.id;
-      const correct = checkFlag(parsed.data.flag, challenge.flagHash);
+
+      // Dynamic challenges validate against the per-instance flags issued to
+      // this user; static ones against the single baked-in flag hash.
+      let correct: boolean;
+      if (challenge.dynamic) {
+        const hashes = await userFlagHashesFor(prisma, userId, challenge.id);
+        if (hashes.length === 0) {
+          return reply.code(422).send({ error: 'no_instance' });
+        }
+        correct = checkFlagAgainst(parsed.data.flag, hashes);
+      } else {
+        if (!challenge.flagHash) {
+          return reply.code(422).send({ error: 'submissions_disabled' });
+        }
+        correct = checkFlag(parsed.data.flag, challenge.flagHash);
+      }
 
       // Record every attempt (never the raw flag).
       await prisma.submission.create({

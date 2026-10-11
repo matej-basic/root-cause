@@ -23,16 +23,33 @@ enum Difficulty {
   hard
 }
 
+enum Plan {
+  free
+  pro
+}
+
+enum InstanceStatus {
+  provisioning
+  running
+  expired
+  stopped
+  failed
+}
+
 model User {
-  id        String   @id @default(cuid())
-  githubId  String   @unique
-  username  String
-  name      String?
-  avatarUrl String?
-  createdAt DateTime @default(now())
+  id                 String   @id @default(cuid())
+  githubId           String   @unique
+  username           String
+  name               String?
+  avatarUrl          String?
+  createdAt          DateTime @default(now())
+  plan               Plan     @default(free)
+  subscriptionActive Boolean  @default(false)
+  stripeCustomerId   String?  @unique
 
   solves      Solve[]
   submissions Submission[]
+  instances   Instance[]
 }
 
 model Challenge {
@@ -48,10 +65,13 @@ model Challenge {
   flagHash    String?
   order       Int
   active      Boolean    @default(true)
+  hostable    Boolean    @default(false)
+  dynamic     Boolean    @default(false)
   createdAt   DateTime   @default(now())
 
   solves      Solve[]
   submissions Submission[]
+  instances   Instance[]
 }
 
 model Solve {
@@ -77,4 +97,27 @@ model Submission {
   challenge Challenge @relation(fields: [challengeId], references: [id])
 
   @@index([userId, challengeId])
+}
+
+// A per-user hosted instance of a hostable/dynamic challenge. The orchestrator
+// (v2) creates one, injects `flagHash`'s preimage into the container as the
+// FLAG, and marks it running with a reachable `url`. The row (and its flagHash)
+// is kept after teardown so a solve submitted just before expiry still
+// validates. At most one provisioning/running instance per (userId,
+// challengeId) is enforced in application code (see lib/instances.ts).
+model Instance {
+  id          String         @id @default(cuid())
+  userId      String
+  challengeId String
+  status      InstanceStatus @default(provisioning)
+  url         String?
+  flagHash    String
+  createdAt   DateTime       @default(now())
+  expiresAt   DateTime
+
+  user      User      @relation(fields: [userId], references: [id])
+  challenge Challenge @relation(fields: [challengeId], references: [id])
+
+  @@index([userId, challengeId])
+  @@index([status, expiresAt])
 }

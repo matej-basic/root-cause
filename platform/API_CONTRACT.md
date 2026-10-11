@@ -32,18 +32,33 @@ JWT payload: `{ sub: userId, gh: githubId, username, name, avatarUrl, iat, exp }
 ## Data model (Prisma / Postgres)
 
 - `User`: `id` (cuid), `githubId` (unique string), `username`, `name?`,
-  `avatarUrl?`, `createdAt`.
+  `avatarUrl?`, `createdAt`, `plan` (`free` | `pro`, default `free`),
+  `subscriptionActive` (bool, default false), `stripeCustomerId?`.
 - `Challenge`: `id`, `slug` (unique), `title`, `cveId`, `category`
   (`web` | `pwn` | `crypto` | `misc`), `difficulty`
   (`easy` | `medium` | `hard`), `points` (int), `summary` (short),
   `description` (markdown, how to reach + walkthrough-level hint), `flagHash?`
-  (sha256 hex of the flag, nullable = submissions not yet enabled), `order`
-  (int), `active` (bool, default true), `createdAt`.
+  (sha256 hex of the static flag; nullable = no static flag; ignored when
+  `dynamic`), `order` (int), `active` (bool, default true), `hostable`
+  (bool, default false = can be spun up on demand), `dynamic` (bool, default
+  false = issues a per-instance flag instead of using `flagHash`), `createdAt`.
 - `Solve`: `id`, `userId`, `challengeId`, `createdAt`. Unique `(userId, challengeId)`.
 - `Submission`: `id`, `userId`, `challengeId`, `correct` (bool), `createdAt`.
   Raw flag text is **not** stored. Used for rate-limiting and stats.
+- `Instance` (v2): `id` (cuid), `userId`, `challengeId`, `status`
+  (`provisioning` | `running` | `expired` | `stopped` | `failed`), `url?`
+  (reachable address once `running`: `http(s)://…`, or `ssh://user@host:port`
+  for SSH challenges like Dirty Pipe), `flagHash` (sha256 hex of this instance's
+  dynamic flag), `createdAt`, `expiresAt` (TTL cutoff). At most one
+  `provisioning`/`running` instance per `(userId, challengeId)` (concurrency
+  cap). The `flagHash` row is retained after teardown so a solve submitted just
+  before expiry still validates.
 
-Flag check: `sha256(submitted.trim()) === challenge.flagHash` (case-sensitive).
+Flag check (static, `dynamic = false`): `sha256(submitted.trim()) === challenge.flagHash`.
+Flag check (dynamic, `dynamic = true`): `sha256(submitted.trim())` matches the
+`flagHash` of any `Instance` ever issued to this user for this challenge. Both
+case-sensitive. A dynamic challenge with no instance issued to the user →
+`422 no_instance` on submit.
 
 ## Endpoints
 
@@ -60,7 +75,7 @@ All JSON. Auth = requires `Authorization: Bearer <jwt>`; 401 if missing/invalid.
 `{WEB}/auth/callback#error=<code>` on failure.
 
 ### `GET /me`  (auth)
-→ `200 { user: { id, username, name, avatarUrl }, stats: { points, solves, rank }, solvedChallengeIds: string[], solves: [{ challengeId, solvedAt }] }`
+→ `200 { user: { id, username, name, avatarUrl, plan, subscriptionActive }, stats: { points, solves, rank }, solvedChallengeIds: string[], solves: [{ challengeId, solvedAt }] }`
 `solves` carries each solve's ISO timestamp (ascending), so the profile can show when each challenge was solved. `rank` is null when the user has no solves.
 
 ### `GET /challenges`  (auth optional)
@@ -77,13 +92,57 @@ Body `{ "flag": "flag{...}" }`.
 → `200 { correct: true, alreadySolved: false, pointsAwarded: 200 }`
 → `200 { correct: false }`
 → `200 { correct: true, alreadySolved: true, pointsAwarded: 0 }`
-→ `422 { error: "submissions_disabled" }` when `flagHash` is null.
+→ `422 { error: "submissions_disabled" }` when static and `flagHash` is null.
+→ `422 { error: "no_instance" }` when dynamic and the user never spun one up.
 → `429 { error: "rate_limited" }` (submit limit, e.g. 10/min/user).
 
 ### `GET /leaderboard`  (public)
 → `200 { leaderboard: [{ rank, userId, username, avatarUrl, points, solves, lastSolveAt }] }`
 Ranking: `points` desc, then earliest `lastSolveAt` first (earlier finish wins),
 then `username` asc. Users with zero solves are excluded.
+
+## On-demand instances (v2)
+
+Paid-only. All require `Authorization: Bearer <jwt>` and
+`user.subscriptionActive === true`; otherwise `402 subscription_required`.
+Spawning mints a fresh dynamic flag, injects it into the container
+(`FLAG` env, placed where the vuln exposes it), and enforces a server-side TTL.
+
+### `POST /challenges/:slug/instance`  (auth, subscription)
+Spin up the caller's instance of a hostable challenge.
+→ `201 { instance: { id, status, url, expiresAt } }`
+→ `402 { error: "subscription_required" }`
+→ `409 { error: "instance_exists", instance: {...} }` (one at a time per challenge)
+→ `422 { error: "not_hostable" }` when the challenge is not `hostable`.
+→ `429 { error: "rate_limited" }` (spawn limit, e.g. 5/hour/user).
+
+### `GET /challenges/:slug/instance`  (auth)
+Current instance for this user + challenge. Poll after a spawn until
+`status` is `running` and `url` is set.
+→ `200 { instance: { id, status, url, createdAt, expiresAt } }`
+→ `404 { error: "no_instance" }`
+
+### `DELETE /challenges/:slug/instance`  (auth)
+Tear the instance down now, freeing compute before the TTL.
+→ `204`
+→ `404 { error: "no_instance" }`
+
+### `POST /challenges/:slug/instance/extend`  (auth, subscription)
+Push `expiresAt` out by a fixed step (e.g. +1h), capped at a daily ceiling.
+→ `200 { instance: { id, status, url, expiresAt } }`
+→ `404 { error: "no_instance" }`
+→ `409 { error: "extend_cap_reached" }`
+
+### `GET /instances`  (auth)
+All of the caller's active instances (for a "running now" view).
+→ `200 { instances: [{ id, challengeId, status, url, expiresAt }] }`
+
+### `POST /webhooks/stripe`  (no auth; Stripe signature verified)
+Flips `user.subscriptionActive` / `user.plan` on
+`checkout.session.completed`, `customer.subscription.updated|deleted`.
+Verifies the `Stripe-Signature` header against the webhook secret; raw body.
+→ `200 { received: true }`
+→ `400 { error: "bad_signature" }`
 
 ## Errors
 
