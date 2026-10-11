@@ -13,8 +13,33 @@ permissions:
   contents: write
 
 jobs:
+  test:
+    name: tests (gate the release)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: API unit tests
+        working-directory: platform/api
+        run: |
+          npm ci
+          npx prisma generate
+          npm test
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: CLI vet and build
+        working-directory: cli
+        run: |
+          go vet ./...
+          go build ./...
+
   build:
     name: build ${{ matrix.goos }}/${{ matrix.goarch }}
+    needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
