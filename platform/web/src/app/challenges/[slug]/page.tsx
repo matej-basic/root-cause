@@ -11,6 +11,7 @@ import type { ChallengeDetail } from "@/lib/types";
 import { CategoryBadge, CveBadge, DifficultyBadge, PointsBadge, SolvedPill } from "@/components/Badges";
 import { Markdown } from "@/components/Markdown";
 import { FlagSubmitForm } from "@/components/FlagSubmitForm";
+import { RunChallenge } from "@/components/RunChallenge";
 
 export default function ChallengeDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -94,6 +95,9 @@ export default function ChallengeDetailPage() {
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_minmax(300px,360px)]">
         <article className="min-w-0">
           <Markdown content={challenge.description} />
+          {challenge.image && (
+            <RunChallenge slug={challenge.slug} image={challenge.image} />
+          )}
         </article>
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <FlagSubmitForm slug={challenge.slug} initiallySolved={solved} />

@@ -11,6 +11,7 @@ import { getToken } from "./token";
 import type {
   ChallengeDetail,
   ChallengeListItem,
+  GenerateApiKeyResult,
   LeaderboardRow,
   MeResponse,
   SubmitResult,
@@ -141,4 +142,17 @@ export async function getMe(): Promise<MeResponse | null> {
   const res = await rawRequest<MeResponse>("/me");
   if (res.ok && res.data?.user) return res.data;
   return null;
+}
+
+// POST /me/api-key → the PLAINTEXT key, returned exactly once. The server stores
+// only its hash + a short prefix; a later GET /me reports { exists, prefix }.
+export async function generateApiKey(): Promise<GenerateApiKeyResult> {
+  if (!getToken()) return { ok: false, reason: "unauthenticated" };
+  const res = await rawRequest<{ key?: string; error?: string }>("/me/api-key", {
+    method: "POST",
+    body: {},
+  });
+  if (res.status === 401) return { ok: false, reason: "unauthenticated" };
+  if (res.ok && res.data?.key) return { ok: true, key: res.data.key };
+  return { ok: false, reason: "error" };
 }

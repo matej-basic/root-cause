@@ -11,6 +11,7 @@ import type { ChallengeListItem } from "@/lib/types";
 import { Avatar } from "@/components/Avatar";
 import { CategoryBadge, CveBadge } from "@/components/Badges";
 import { SignInButton } from "@/components/SignInButton";
+import { ApiKeySection } from "@/components/ApiKeySection";
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
@@ -104,6 +105,8 @@ export default function ProfilePage() {
         <StatTile label="rank" value={stats?.rank ? `#${stats.rank}` : "—"} />
         <StatTile label="solves" value={String(stats?.solves ?? solved.length)} />
       </div>
+
+      <ApiKeySection />
 
       <section aria-labelledby="solved-heading" className="mt-10">
         <h2 id="solved-heading" className="font-display text-xl font-bold tracking-tight">

@@ -75,6 +75,7 @@ The flag is waiting once you are root.`,
     active: true,
     solveCount: 0,
     solved: false,
+    image: "matejbasic/cve-2022-1271:1.0",
     summary:
       "A newline in a filename confuses zgrep into running your commands. Turn an archive search into code execution.",
     description: `## The bug
@@ -103,6 +104,7 @@ When zgrep processes that name, your command runs. Use it to read the flag off t
     active: true,
     solveCount: 0,
     solved: false,
+    image: "matejbasic/cve-2022-22965",
     summary:
       "Exploit Spring's data binding on a WAR-deployed app to drop a web shell and run commands on the server.",
     description: `## The bug
@@ -127,6 +129,7 @@ The flag is at \`/root/flag.txt\`.`,
     active: true,
     solveCount: 0,
     solved: false,
+    image: "matejbasic/cve-2022-37454:1.0",
     summary:
       "Feed a huge input to Python's SHA-3 implementation and trip a buffer overflow in the _sha3 module.",
     description: `## The bug
@@ -158,6 +161,7 @@ Reproduce the overflow against the running target to earn the flag.`,
     active: true,
     solveCount: 0,
     solved: false,
+    image: "matejbasic/cve-2022-42889:1.0",
     summary:
       "Smuggle a ${script:...} lookup into Apache Commons Text and make the interpolator execute your payload.",
     description: `## The bug

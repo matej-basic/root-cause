@@ -17,6 +17,10 @@ export interface ChallengeListItem {
   active: boolean;
   solveCount: number;
   solved: boolean;
+  // Published container image for this challenge, used to generate the
+  // docker-compose. Present for launchable (dynamic) challenges; absent for
+  // challenges that cannot be spun up locally.
+  image?: string | null;
 }
 
 // GET /challenges/:slug adds the markdown description.
@@ -42,12 +46,20 @@ export interface SolveInfo {
   solvedAt: string; // ISO timestamp
 }
 
+// API key metadata from GET /me. The secret itself is never returned here; it
+// is only shown once at POST /me/api-key time.
+export interface ApiKeyInfo {
+  exists: boolean;
+  prefix?: string | null;
+}
+
 // GET /me
 export interface MeResponse {
   user: User;
   stats: UserStats;
   solvedChallengeIds: string[];
   solves?: SolveInfo[];
+  apiKey?: ApiKeyInfo;
 }
 
 export interface LeaderboardRow {
@@ -75,3 +87,8 @@ export interface SubmitResult {
   pointsAwarded?: number;
   message?: string;
 }
+
+// POST /me/api-key result, normalized for the UI.
+export type GenerateApiKeyResult =
+  | { ok: true; key: string }
+  | { ok: false; reason: "unauthenticated" | "error" };

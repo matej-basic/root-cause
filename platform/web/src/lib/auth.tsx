@@ -16,13 +16,14 @@ import {
 } from "react";
 import { getMe, githubSignInUrl } from "./api";
 import { clearToken, getToken, setReturnTo } from "./token";
-import type { SolveInfo, User, UserStats } from "./types";
+import type { ApiKeyInfo, SolveInfo, User, UserStats } from "./types";
 
 interface AuthState {
   user: User | null;
   stats: UserStats | null;
   solvedChallengeIds: string[];
   solves: SolveInfo[];
+  apiKey: ApiKeyInfo | null;
   loading: boolean;
   isAuthed: boolean;
   signIn: (returnTo?: string) => void;
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [solvedChallengeIds, setSolvedChallengeIds] = useState<string[]>([]);
   const [solves, setSolves] = useState<SolveInfo[]>([]);
+  const [apiKey, setApiKey] = useState<ApiKeyInfo | null>(null);
   const [loading, setLoading] = useState(true);
 
   // getMe() already returns null when no token is stored or the API is
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStats(me?.stats ?? null);
     setSolvedChallengeIds(me?.solvedChallengeIds ?? []);
     setSolves(me?.solves ?? []);
+    setApiKey(me?.apiKey ?? null);
     setLoading(false);
   }, []);
 
@@ -61,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setStats(me?.stats ?? null);
       setSolvedChallengeIds(me?.solvedChallengeIds ?? []);
       setSolves(me?.solves ?? []);
+      setApiKey(me?.apiKey ?? null);
       setLoading(false);
     })();
     return () => {
@@ -82,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStats(null);
     setSolvedChallengeIds([]);
     setSolves([]);
+    setApiKey(null);
   }, []);
 
   const value = useMemo<AuthState>(
@@ -90,13 +95,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       stats,
       solvedChallengeIds,
       solves,
+      apiKey,
       loading,
       isAuthed: !!user,
       signIn,
       signOut,
       refresh: load,
     }),
-    [user, stats, solvedChallengeIds, solves, loading, signIn, signOut, load],
+    [user, stats, solvedChallengeIds, solves, apiKey, loading, signIn, signOut, load],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
