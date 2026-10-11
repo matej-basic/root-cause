@@ -12,48 +12,21 @@ interface SeedChallenge {
   order: number;
   summary: string;
   description: string;
-  // sha256 hex of the canonical flag, or null to disable submissions.
+  // Published image students pull in the self-host docker-compose.
+  image: string;
+  // sha256 hex of the canonical flag, or null to validate per-run instead.
   // Raw flag strings never appear in this file.
   flagHash: string | null;
-  // v2 hosting. `hostable`: the platform can spin up a per-user instance.
-  // `dynamic`: that instance gets its own random flag, so `submit` validates
-  // against the instance flag instead of `flagHash`. Both default off; flip a
-  // challenge on only once its container reads FLAG from the environment and
-  // the orchestrator can deploy it. A dynamic challenge with no live instance
-  // rejects submissions, so do not enable `dynamic` before hosting works.
-  hostable?: boolean;
+  // `dynamic`: students run the challenge locally and the flagger sidecar mints
+  // a per-run flag (POST /challenges/:slug/run), so `submit` validates against
+  // the user's Run flags instead of `flagHash`. A dynamic challenge with no run
+  // for the user rejects submissions.
   dynamic?: boolean;
+  // Whether the challenge shows up in the catalog. Off for ones not yet ready.
+  active?: boolean;
 }
 
 const challenges: SeedChallenge[] = [
-  {
-    slug: 'erms-sqli',
-    cveId: 'CVE-2021-44966',
-    title: 'ERMS SQL injection auth bypass',
-    category: Category.web,
-    difficulty: Difficulty.easy,
-    points: 100,
-    order: 1,
-    summary: 'Bypass the ERMS login form with a classic SQL injection and take over the admin account.',
-    description: [
-      '# ERMS SQL injection auth bypass',
-      '',
-      'The Employee Record Management System (PHPGurukul ERMS 1.2) builds its login query by pasting the username straight into SQL with no escaping. A crafted username closes the string literal early and rewrites the `WHERE` clause, so you can log in as the admin without a password. From the admin area you can read and change every record in the system, and the flag is hidden inside an employee description.',
-      '',
-      'The usual payloads for this bug go in the username field:',
-      '',
-      '```',
-      "marko' or 1=1-- -",
-      '```',
-      '',
-      '## How to reach it',
-      '',
-      'This challenge runs from the external `jura43/erms` image and is served through the cluster Ingress host (deployment `challenge_1`), not a fixed port like the other challenges. Open the ERMS login page and work against `index.php`.',
-      '',
-      'Submissions are disabled here. The flag baked into the external image is not known to the platform, so you can practise the technique but the scoreboard will not accept a flag for this one.',
-    ].join('\n'),
-    flagHash: null,
-  },
   {
     slug: 'zgrep-rce',
     cveId: 'CVE-2022-1271',
@@ -61,7 +34,7 @@ const challenges: SeedChallenge[] = [
     category: Category.misc,
     difficulty: Difficulty.medium,
     points: 200,
-    order: 2,
+    order: 1,
     summary: 'Confuse zgrep with a newline in a filename to overwrite files and reach command execution.',
     description: [
       '# zgrep arbitrary file write',
@@ -72,9 +45,11 @@ const challenges: SeedChallenge[] = [
       '',
       '## How to reach it',
       '',
-      'Kubernetes: NodePort `30102` on the cluster node. Docker Compose: host port `10002` maps to `8080` in the container. The service speaks HTTP on port 8080.',
+      'Run the challenge locally with its docker-compose. The flagger sidecar writes your per-run flag into the container before it starts. The service speaks HTTP on port 8080.',
     ].join('\n'),
-    flagHash: 'b4290f6ed15bd8c5bc18d11fa397549f91530fd77c54b550effcfbe9bdd9d5e0',
+    image: 'matejbasic/cve-2022-1271:1.0',
+    flagHash: null,
+    dynamic: true,
   },
   {
     slug: 'sha3-overflow',
@@ -83,7 +58,7 @@ const challenges: SeedChallenge[] = [
     category: Category.crypto,
     difficulty: Difficulty.medium,
     points: 300,
-    order: 3,
+    order: 2,
     summary: 'Overflow the _sha3 buffer in CPython 3.10 and earlier by hashing a very large input.',
     description: [
       '# SHA-3 buffer overflow',
@@ -101,9 +76,11 @@ const challenges: SeedChallenge[] = [
       '',
       '## How to reach it',
       '',
-      'Kubernetes: NodePort `30104` on the cluster node. Docker Compose: host port `10004` maps to `8080` in the container. The service speaks HTTP on port 8080.',
+      'Run the challenge locally with its docker-compose. The flagger sidecar writes your per-run flag into the container before it starts. The service speaks HTTP on port 8080.',
     ].join('\n'),
-    flagHash: '1009f8bf0307434321d87c4509f368bfd88908e481abca00aa09ad534dc0ee5a',
+    image: 'matejbasic/cve-2022-37454:1.0',
+    flagHash: null,
+    dynamic: true,
   },
   {
     slug: 'text4shell',
@@ -112,7 +89,7 @@ const challenges: SeedChallenge[] = [
     category: Category.web,
     difficulty: Difficulty.medium,
     points: 300,
-    order: 4,
+    order: 3,
     summary: 'Abuse Apache Commons Text string interpolation to run commands on the server.',
     description: [
       '# Text4Shell RCE',
@@ -127,9 +104,11 @@ const challenges: SeedChallenge[] = [
       '',
       '## How to reach it',
       '',
-      'Kubernetes: NodePort `30105` on the cluster node. Docker Compose: host port `10005` maps to `8080` in the container. The service speaks HTTP on port 8080.',
+      'Run the challenge locally with its docker-compose. The flagger sidecar writes your per-run flag into the container before it starts. The service speaks HTTP on port 8080.',
     ].join('\n'),
-    flagHash: '222361b0fd8a38c4caf45a3c3c48b3cb0bd1de5929a1b5f84b0f7eeed84b20df',
+    image: 'matejbasic/cve-2022-42889:1.0',
+    flagHash: null,
+    dynamic: true,
   },
   {
     slug: 'spring4shell',
@@ -138,20 +117,22 @@ const challenges: SeedChallenge[] = [
     category: Category.web,
     difficulty: Difficulty.hard,
     points: 400,
-    order: 5,
+    order: 4,
     summary: 'Reach RCE through Spring MVC data binding against a WAR deployment on Tomcat.',
     description: [
       '# Spring4Shell RCE',
       '',
       'CVE-2022-22965 is a remote code execution bug in Spring MVC data binding on JDK 9 and newer. By steering the object properties that Spring binds from request parameters, an attacker reaches the class loader and writes a file into the server. The exploit only works when the app runs as a WAR on Tomcat, which is exactly how this challenge is deployed. A default Spring Boot jar would not be vulnerable.',
       '',
-      'The target is a small bakery blog. The vulnerable endpoint is a `POST` to `/blogposts/posts`. The common approach writes a web shell through the data-binding trick, then calls it to run commands. The flag sits at `/root/flag.txt`.',
+      'The target is a small bakery blog. The vulnerable endpoint is a `POST` to `/blogposts/posts`. The common approach writes a web shell through the data-binding trick, then calls it to run commands. The flag sits where the vulnerability lets you read it.',
       '',
       '## How to reach it',
       '',
-      'Kubernetes: NodePort `30103` on the cluster node. Docker Compose: host port `10003` maps to `8080` in the container. The app is at `http://localhost:8080/blogposts/`.',
+      'Run the challenge locally with its docker-compose. The flagger sidecar writes your per-run flag into the container before it starts. The app is at `http://localhost:8080/blogposts/`.',
     ].join('\n'),
-    flagHash: '7b9271992859fb0454c16f12dc79c559630457e66c829d92ecb35248593ef532',
+    image: 'matejbasic/cve-2022-22965',
+    flagHash: null,
+    dynamic: true,
   },
   {
     slug: 'dirty-pipe',
@@ -160,7 +141,7 @@ const challenges: SeedChallenge[] = [
     category: Category.pwn,
     difficulty: Difficulty.hard,
     points: 500,
-    order: 6,
+    order: 5,
     summary: 'Linux kernel Dirty Pipe local privilege escalation from a low-privileged SSH user to root.',
     description: [
       '# Dirty Pipe',
@@ -171,45 +152,37 @@ const challenges: SeedChallenge[] = [
       '',
       '## How to reach it',
       '',
-      'This is an SSH challenge, not an HTTP one. Kubernetes: NodePort `30101` on the cluster node. Docker Compose: host port `10001` maps to port `22` (SSH) in the container. Log in as the `baker` user.',
+      'This is an SSH challenge, not an HTTP one. Log in as the `baker` user over SSH.',
     ].join('\n'),
+    image: 'matejbasic/cve-2022-0847',
+    // Still static and pending a kernel test on the self-host target, so it is
+    // held out of the catalog until the per-run flag path is validated for it.
     flagHash: '6839bdcabc934ec34c6e46b9bee43d8373c2d71dc55a1d9ccfe9e22da4579e76',
+    dynamic: false,
+    active: false,
   },
 ];
 
 async function main(): Promise<void> {
   for (const c of challenges) {
+    const data = {
+      cveId: c.cveId,
+      title: c.title,
+      category: c.category,
+      difficulty: c.difficulty,
+      points: c.points,
+      order: c.order,
+      summary: c.summary,
+      description: c.description,
+      image: c.image,
+      flagHash: c.flagHash,
+      dynamic: c.dynamic ?? false,
+      active: c.active ?? true,
+    };
     await prisma.challenge.upsert({
       where: { slug: c.slug },
-      update: {
-        cveId: c.cveId,
-        title: c.title,
-        category: c.category,
-        difficulty: c.difficulty,
-        points: c.points,
-        order: c.order,
-        summary: c.summary,
-        description: c.description,
-        flagHash: c.flagHash,
-        hostable: c.hostable ?? false,
-        dynamic: c.dynamic ?? false,
-        active: true,
-      },
-      create: {
-        slug: c.slug,
-        cveId: c.cveId,
-        title: c.title,
-        category: c.category,
-        difficulty: c.difficulty,
-        points: c.points,
-        order: c.order,
-        summary: c.summary,
-        description: c.description,
-        flagHash: c.flagHash,
-        hostable: c.hostable ?? false,
-        dynamic: c.dynamic ?? false,
-        active: true,
-      },
+      update: data,
+      create: { slug: c.slug, ...data },
     });
     console.log(`upserted ${c.slug}`);
   }

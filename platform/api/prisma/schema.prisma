@@ -23,33 +23,18 @@ enum Difficulty {
   hard
 }
 
-enum Plan {
-  free
-  pro
-}
-
-enum InstanceStatus {
-  provisioning
-  running
-  expired
-  stopped
-  failed
-}
-
 model User {
-  id                 String   @id @default(cuid())
-  githubId           String   @unique
-  username           String
-  name               String?
-  avatarUrl          String?
-  createdAt          DateTime @default(now())
-  plan               Plan     @default(free)
-  subscriptionActive Boolean  @default(false)
-  stripeCustomerId   String?  @unique
+  id        String   @id @default(cuid())
+  githubId  String   @unique
+  username  String
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
 
   solves      Solve[]
   submissions Submission[]
-  instances   Instance[]
+  runs        Run[]
+  apiKeys     ApiKey[]
 }
 
 model Challenge {
@@ -62,16 +47,21 @@ model Challenge {
   points      Int
   summary     String
   description String
+  // Published image name students pull in the self-host compose.
+  image       String
+  // sha256 hex of the static flag; null for challenges validated per-run.
+  // Ignored when `dynamic` is true.
   flagHash    String?
   order       Int
   active      Boolean    @default(true)
-  hostable    Boolean    @default(false)
+  // true = flag is validated against the user's Run flags (self-host, per-run
+  // flag minted by POST /challenges/:slug/run). false = static flagHash.
   dynamic     Boolean    @default(false)
   createdAt   DateTime   @default(now())
 
   solves      Solve[]
   submissions Submission[]
-  instances   Instance[]
+  runs        Run[]
 }
 
 model Solve {
@@ -99,25 +89,38 @@ model Submission {
   @@index([userId, challengeId])
 }
 
-// A per-user hosted instance of a hostable/dynamic challenge. The orchestrator
-// (v2) creates one, injects `flagHash`'s preimage into the container as the
-// FLAG, and marks it running with a reachable `url`. The row (and its flagHash)
-// is kept after teardown so a solve submitted just before expiry still
-// validates. At most one provisioning/running instance per (userId,
-// challengeId) is enforced in application code (see lib/instances.ts).
-model Instance {
-  id          String         @id @default(cuid())
+// A per-run flag minted for a user running a dynamic challenge locally via the
+// self-host compose. `POST /challenges/:slug/run` creates one and returns the
+// raw flag (never stored; only `flagHash` lives here) for the flagger sidecar
+// to write into the challenge container. A submitted flag validates against the
+// hashes of this user's runs for the challenge (see lib/runs.ts).
+model Run {
+  id          String    @id @default(cuid())
   userId      String
   challengeId String
-  status      InstanceStatus @default(provisioning)
-  url         String?
   flagHash    String
-  createdAt   DateTime       @default(now())
-  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  solvedAt    DateTime?
 
   user      User      @relation(fields: [userId], references: [id])
   challenge Challenge @relation(fields: [challengeId], references: [id])
 
   @@index([userId, challengeId])
-  @@index([status, expiresAt])
+}
+
+// An API key authenticates `POST /challenges/:slug/run` (the flagger sidecar).
+// Only the sha256 hash of the raw key is stored, plus a short display prefix.
+// One active (non-revoked) key per user: regenerating revokes the prior one.
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  hashedKey  String    @unique
+  prefix     String
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revoked    Boolean   @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }

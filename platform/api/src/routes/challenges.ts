@@ -4,13 +4,17 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getPrisma } from '../lib/prisma.js';
 import { checkFlag, checkFlagAgainst } from '../lib/flag-hash.js';
-import { userFlagHashesFor } from '../lib/instances.js';
+import { issueRun, userFlagHashesFor } from '../lib/runs.js';
+import { hashApiKey } from '../lib/api-key.js';
 import { verifyAppToken } from '../lib/jwt.js';
 import { optionalAuth, requireAuth } from '../lib/auth-hooks.js';
 
 const submitSchema = z.object({
   flag: z.string().min(1).max(512),
 });
+
+/** Max runs a single user may mint per rolling 24h window. */
+const RUN_DAILY_CAP = 100;
 
 /** Public, list-safe projection of a challenge (no flagHash, no description). */
 function toListItem(challenge: Challenge, solveCount: number, solved: boolean) {
@@ -23,6 +27,8 @@ function toListItem(challenge: Challenge, solveCount: number, solved: boolean) {
     difficulty: challenge.difficulty,
     points: challenge.points,
     summary: challenge.summary,
+    image: challenge.image,
+    dynamic: challenge.dynamic,
     order: challenge.order,
     active: challenge.active,
     solveCount,
@@ -46,6 +52,22 @@ function submitRateLimitKey(request: FastifyRequest): string {
     }
   }
   return `submit:ip:${request.ip}`;
+}
+
+/**
+ * Rate-limit key for the run route. Keys per presented API key. One active key
+ * per user, so this is per-user in practice, and it needs no DB lookup (mirrors
+ * `submitRateLimitKey`). Falls back to IP when no bearer key is presented.
+ */
+function runRateLimitKey(request: FastifyRequest): string {
+  const header = request.headers.authorization;
+  if (header && header.startsWith('Bearer ')) {
+    const raw = header.slice('Bearer '.length).trim();
+    if (raw) {
+      return `run:key:${hashApiKey(raw)}`;
+    }
+  }
+  return `run:ip:${request.ip}`;
 }
 
 export async function challengeRoutes(app: FastifyInstance): Promise<void> {
@@ -109,7 +131,66 @@ export async function challengeRoutes(app: FastifyInstance): Promise<void> {
     };
   });
 
-  // POST /challenges/:slug/submit (auth)
+  // POST /challenges/:slug/run (API-key auth)
+  // The flagger sidecar presents the user's API key and gets a fresh per-run
+  // flag plus a Run bound to that user.
+  app.post(
+    '/challenges/:slug/run',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+          keyGenerator: runRateLimitKey,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { slug } = request.params as { slug: string };
+      const prisma = getPrisma();
+
+      // API-key auth: hash the presented key and resolve a non-revoked key.
+      const header = request.headers.authorization;
+      const raw = header && header.startsWith('Bearer ') ? header.slice('Bearer '.length).trim() : '';
+      if (!raw) {
+        return reply.code(401).send({ error: 'unauthorized' });
+      }
+      const apiKey = await prisma.apiKey.findFirst({
+        where: { hashedKey: hashApiKey(raw), revoked: false },
+      });
+      if (!apiKey) {
+        return reply.code(401).send({ error: 'unauthorized' });
+      }
+
+      const challenge = await prisma.challenge.findUnique({ where: { slug } });
+      if (!challenge || !challenge.active || !challenge.dynamic) {
+        return reply.code(404).send({ error: 'not_found' });
+      }
+
+      // Daily cap: count this user's runs in the last 24h.
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const recent = await prisma.run.count({
+        where: { userId: apiKey.userId, createdAt: { gte: since } },
+      });
+      if (recent >= RUN_DAILY_CAP) {
+        return reply.code(429).send({ error: 'rate_limited' });
+      }
+
+      const { run, flag } = await issueRun(prisma, {
+        userId: apiKey.userId,
+        challengeId: challenge.id,
+      });
+
+      await prisma.apiKey.update({
+        where: { id: apiKey.id },
+        data: { lastUsedAt: new Date() },
+      });
+
+      return { runId: run.id, flag };
+    },
+  );
+
+  // POST /challenges/:slug/submit (web JWT auth)
   app.post(
     '/challenges/:slug/submit',
     {
@@ -138,13 +219,13 @@ export async function challengeRoutes(app: FastifyInstance): Promise<void> {
 
       const userId = request.user!.id;
 
-      // Dynamic challenges validate against the per-instance flags issued to
-      // this user; static ones against the single baked-in flag hash.
+      // Dynamic challenges validate against the per-run flags issued to this
+      // user; static ones against the single baked-in flag hash.
       let correct: boolean;
       if (challenge.dynamic) {
         const hashes = await userFlagHashesFor(prisma, userId, challenge.id);
         if (hashes.length === 0) {
-          return reply.code(422).send({ error: 'no_instance' });
+          return reply.code(422).send({ error: 'no_run' });
         }
         correct = checkFlagAgainst(parsed.data.flag, hashes);
       } else {
