@@ -1,21 +1,13 @@
 # Root Cause platform
 
-A hosted CTF platform for the challenge set in this repo. Pick a challenge,
-exploit the real CVE, submit the flag, and climb a points leaderboard. Sign-in
-is one click with GitHub.
+A hosted CTF platform for the challenge set in this repo. Two live services:
+a Next.js front end on Vercel and a Fastify API on Railway backed by Postgres,
+with a contract-first spec that both conform to. Sign-in is one click with
+GitHub, flags are mint-per-run and checked against your own account, and there
+is a points leaderboard.
 
-- Play: https://root-cause-ctf.vercel.app
-- API: https://root-cause-production-3c05.up.railway.app
-
-## What it does
-
-- A catalog of the six course challenges, each with its CVE, category,
-  difficulty, points, and a student-facing brief drawn from the challenge README.
-- GitHub OAuth login. No passwords are stored.
-- Flag submission with server-side checking. The platform stores only the
-  SHA-256 hash of each flag, never the flag itself.
-- A points leaderboard, ranked by score and then by who reached it first.
-- A profile showing your solves and when you landed them.
+- Play: https://root-cause.matejbasic.com
+- API: https://root-cause-api.matejbasic.com
 
 ## Architecture
 
@@ -26,12 +18,32 @@ Browser ──> Next.js app (Vercel)  ──HTTPS──>  Fastify API (Railway) 
 
 The API owns the GitHub OAuth flow and the database. After GitHub authorizes a
 user, the API signs a short-lived JWT and hands it to the web app in the URL
-fragment; the web app sends it back as a bearer token on later requests. There
-are no cross-site cookies, so the split between `*.vercel.app` and
-`*.up.railway.app` stays reliable.
+fragment; the web app sends it back as a bearer token on later requests. The
+web app (`root-cause.matejbasic.com`) and the API (`root-cause-api.matejbasic.com`)
+are different origins on the same site. Nothing relies on that: auth uses no
+cookies, so it would behave the same if the two ran on unrelated domains.
+
+A second credential path exists for the self-host flow. From the profile page a
+user mints an API key, stored only as a SHA-256 hash plus a short display
+prefix. The `flagger` sidecar sends that key to `POST /challenges/:slug/run`,
+which mints a per-run flag bound to the user and returns it to be written into
+the locally running challenge. Flag submission itself stays web-JWT only.
 
 `API_CONTRACT.md` is the single source of truth for the endpoints and data
 shapes. Change it first if the contract needs to move.
+
+## What it does
+
+- A catalog of the live challenges, each with its CVE, category, difficulty,
+  points, and a student-facing brief drawn from the challenge README.
+- GitHub OAuth login. No passwords are stored.
+- API keys for the self-host CLI and sidecar, shown once and stored only as a
+  hash.
+- Flag submission with server-side checking. The platform stores only the
+  SHA-256 hash of each flag, never the flag itself, and a dynamic flag is
+  matched against the runs issued to that user.
+- A points leaderboard, ranked by score and then by who reached it first.
+- A profile showing your solves and when you landed them.
 
 ## Layout
 
@@ -75,8 +87,8 @@ and set `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` in `platform/api/.env`.
 
 ## Notes
 
-- The ERMS challenge (CVE-2021-44966) runs from an external image whose flag is
-  not known here, so its submissions are disabled and it shows as such.
-- Flags are static per challenge. A future version could boot a throwaway
-  vulnerable container per attempt and time the solve, which is why the brainstorm
-  under `brainstorm/` leans that way. This v1 is the platform and auth layer.
+- The launch catalog is the four app-level challenges (zgrep-rce, spring4shell,
+  sha3-overflow, text4shell), all dynamic. Each issues a per-run flag through
+  the sidecar rather than carrying a static one.
+- Dirty Pipe (CVE-2022-0847) stays in the repo but inactive, pending a kernel
+  test. The ERMS challenge (CVE-2021-44966) is dropped from the launch set.
