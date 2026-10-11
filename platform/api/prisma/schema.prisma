@@ -70,6 +70,8 @@ model Solve {
   id          String   @id @default(cuid())
   userId      String
   challengeId String
+  // Points awarded for this solve: base + speed bonus (see lib/scoring.ts).
+  points      Int      @default(0)
   createdAt   DateTime @default(now())
 
   user      User      @relation(fields: [userId], references: [id])

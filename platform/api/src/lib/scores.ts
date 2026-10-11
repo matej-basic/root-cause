@@ -28,7 +28,7 @@ export async function computeLeaderboard(prisma: PrismaClient): Promise<RankedEn
       };
       byUser.set(solve.userId, entry);
     }
-    entry.points += solve.challenge.points;
+    entry.points += solve.points || solve.challenge.points;
     entry.solves += 1;
     if (!entry.lastSolveAt || solve.createdAt > entry.lastSolveAt) {
       entry.lastSolveAt = solve.createdAt;

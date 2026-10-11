@@ -42,7 +42,7 @@ JWT payload: `{ sub: userId, gh: githubId, username, name, avatarUrl, iat, exp }
   `dynamic`), `order` (int), `active` (bool, default true), `dynamic` (bool,
   default false = validated against the user's `Run` flags instead of
   `flagHash`), `createdAt`.
-- `Solve`: `id`, `userId`, `challengeId`, `createdAt`. Unique `(userId, challengeId)`.
+- `Solve`: `id`, `userId`, `challengeId`, `points` (int, base + speed bonus awarded for this solve), `createdAt`. Unique `(userId, challengeId)`.
 - `Submission`: `id`, `userId`, `challengeId`, `correct` (bool), `createdAt`.
   Raw flag text is **not** stored. Used for rate-limiting and stats.
 - `Run`: `id` (cuid), `userId`, `challengeId`, `flagHash` (sha256 hex of this
@@ -118,13 +118,23 @@ key's user.
 ### `POST /challenges/:slug/submit`  (auth: web JWT only)
 Body `{ "flag": "flag{...}" }`. No API-key auth here. Dynamic challenges
 validate against the hashes of this user's `Run`s for the challenge; static ones
-against `flagHash`.
-→ `200 { correct: true, alreadySolved: false, pointsAwarded: 200 }`
+against `flagHash`. A first correct solve awards `basePoints` (the challenge's
+`points`) plus a speed `bonus` (see Scoring below); the total is stored on the
+`Solve` and returned as `pointsAwarded`.
+→ `200 { correct: true, alreadySolved: false, pointsAwarded: 280, basePoints: 200, bonus: 80 }`
 → `200 { correct: false }`
 → `200 { correct: true, alreadySolved: true, pointsAwarded: 0 }`
 → `422 { error: "submissions_disabled" }` when static and `flagHash` is null.
 → `422 { error: "no_run" }` when dynamic and the user has never run it.
 → `429 { error: "rate_limited" }` (submit limit, e.g. 10/min/user).
+
+### Scoring
+A first solve earns the challenge's base `points` plus a speed bonus that is
+largest for a fast solve and decays linearly to zero over a 2-hour window
+(up to +50% of base for an instant solve). Time is measured from the user's
+earliest `Run` of the challenge to the submission; a static challenge (no run)
+earns base only. The total is stored on `Solve.points`, and the leaderboard
+sums `Solve.points`. See `lib/scoring.ts`.
 
 ### `GET /leaderboard`  (public)
 → `200 { leaderboard: [{ rank, userId, username, avatarUrl, points, solves, lastSolveAt }] }`

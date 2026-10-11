@@ -48,3 +48,20 @@ export async function userFlagHashesFor(
   });
   return rows.map((r) => r.flagHash);
 }
+
+/**
+ * Timestamp of this user's earliest run of the challenge, or null if they never
+ * ran it. Used to measure solve time for the speed bonus.
+ */
+export async function firstRunAt(
+  prisma: PrismaClient,
+  userId: string,
+  challengeId: string,
+): Promise<Date | null> {
+  const run = await prisma.run.findFirst({
+    where: { userId, challengeId },
+    orderBy: { createdAt: 'asc' },
+    select: { createdAt: true },
+  });
+  return run ? run.createdAt : null;
+}

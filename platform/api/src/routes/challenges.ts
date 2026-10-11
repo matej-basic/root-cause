@@ -4,8 +4,9 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { getPrisma } from '../lib/prisma.js';
 import { checkFlag, checkFlagAgainst } from '../lib/flag-hash.js';
-import { issueRun, userFlagHashesFor } from '../lib/runs.js';
+import { issueRun, userFlagHashesFor, firstRunAt } from '../lib/runs.js';
 import { hashApiKey } from '../lib/api-key.js';
+import { awardedPoints } from '../lib/scoring.js';
 import { verifyAppToken } from '../lib/jwt.js';
 import { optionalAuth, requireAuth } from '../lib/auth-hooks.js';
 
@@ -251,9 +252,22 @@ export async function challengeRoutes(app: FastifyInstance): Promise<void> {
         return { correct: true, alreadySolved: true, pointsAwarded: 0 };
       }
 
+      // Speed bonus: measure from the user's first run of this challenge to now
+      // and decay the bonus over the window. Static challenges (no run) get base.
+      const startedAt = challenge.dynamic ? await firstRunAt(prisma, userId, challenge.id) : null;
+      const points = startedAt
+        ? awardedPoints(challenge.points, Date.now() - startedAt.getTime())
+        : challenge.points;
+
       try {
-        await prisma.solve.create({ data: { userId, challengeId: challenge.id } });
-        return { correct: true, alreadySolved: false, pointsAwarded: challenge.points };
+        await prisma.solve.create({ data: { userId, challengeId: challenge.id, points } });
+        return {
+          correct: true,
+          alreadySolved: false,
+          pointsAwarded: points,
+          basePoints: challenge.points,
+          bonus: points - challenge.points,
+        };
       } catch (err) {
         // Lost the race to another concurrent correct submission.
         if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
