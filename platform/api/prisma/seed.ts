@@ -161,6 +161,30 @@ const challenges: SeedChallenge[] = [
     dynamic: false,
     active: false,
   },
+  {
+    // Dropped from the self-host launch: it runs from an external image whose
+    // flag is not controlled here, so it cannot issue a per-run flag. Kept as an
+    // inactive row so the on-boot seed deactivates the old catalog entry.
+    slug: 'erms-sqli',
+    cveId: 'CVE-2021-44966',
+    title: 'ERMS SQL injection auth bypass',
+    category: Category.web,
+    difficulty: Difficulty.easy,
+    points: 100,
+    order: 6,
+    summary: 'SQL injection auth bypass in the PHPGurukul Employee Record Management System.',
+    description: [
+      '# ERMS SQL injection auth bypass',
+      '',
+      'CVE-2021-44966 is a SQL injection in the login form of the PHPGurukul Employee Record Management System that lets an attacker bypass authentication.',
+      '',
+      'This challenge is not part of the self-host catalog: it runs from an external image whose flag is not controlled here, so it cannot mint a per-run flag.',
+    ].join('\n'),
+    image: '',
+    flagHash: null,
+    dynamic: false,
+    active: false,
+  },
 ];
 
 async function main(): Promise<void> {
