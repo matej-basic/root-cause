@@ -12,12 +12,12 @@ The self-host model: a student runs a challenge locally with Docker Compose. A o
 
 ## Repository layout
 
-- `CVE-*/`: one self-contained challenge each: a vulnerable app, a `Dockerfile`, a `README.md` with the vulnerability write-up and walkthrough, and often an exploit/solve script (`solve.py`, `exploit.py`, `exploit.c`, `generate_base64.py`). Flags are injected at run time by the sidecar, not baked into the image.
+- `labs/`: one self-contained challenge per subdirectory, CVE labs named `CVE-YYYY-NNNNN/` and custom (non-CVE) labs by slug (e.g. `login-sqli/`). Each has a vulnerable app, a `Dockerfile`, a `compose.yml`, and a `README.md` write-up. Exploit/solve scripts live in the gitignored `solutions/<name>/`, not in the lab dir. Flags are injected at run time by the sidecar, not baked into the image.
 - `platform/`: the hosted web app. `platform/api` (Fastify + Prisma + Postgres) and `platform/web` (Next.js), with `platform/API_CONTRACT.md` as the shared spec.
 - `sidecar/`: the one-shot flagger that mints a per-run flag and writes it to `/flag/flag.txt`.
 - `cli/`: the `rootcause` CLI (Go) that logs in with an API key, lists challenges, and brings one up locally.
 
-Each CVE directory is independent; there is no shared build.
+Each lab directory under `labs/` is independent; there is no shared build.
 
 ## Launch catalog
 
@@ -30,14 +30,14 @@ The live catalog is four app-level challenges, all dynamic (a per-run flag per a
 | sha3-overflow | CVE-2022-37454 | SHA-3 (Keccak) buffer overflow | `matejbasic/cve-2022-37454:1.0` |
 | text4shell | CVE-2022-42889 | Text4Shell RCE in Commons Text | `matejbasic/cve-2022-42889:1.0` |
 
-Two challenges stay in the repo but out of the live catalog: Dirty Pipe (CVE-2022-0847, in `CVE-2022-0847/`) is inactive pending a kernel test, and the ERMS SQL injection challenge (CVE-2021-44966) is dropped from the launch set.
+Two challenges stay in the repo but out of the live catalog: Dirty Pipe (CVE-2022-0847, in `labs/CVE-2022-0847/`) is inactive pending a kernel test, and the ERMS SQL injection challenge (CVE-2021-44966) is dropped from the launch set.
 
 ## Common commands
 
-Build and run one challenge image locally (Dockerfile sits in each `CVE-*` dir):
+Build and run one challenge image locally (Dockerfile sits in each `labs/*` dir):
 
 ```bash
-docker build -t cve-2022-1271 ./CVE-2022-1271
+docker build -t cve-2022-1271 ./labs/CVE-2022-1271
 docker run --rm -p 8080:8080 cve-2022-1271
 ```
 
@@ -51,7 +51,7 @@ rootcause run zgrep-rce
 Run an exploit against a running challenge, e.g.:
 
 ```bash
-python CVE-2022-22965/exploit.py   # Spring4Shell
+python solutions/CVE-2022-22965/exploit.py   # Spring4Shell (solve scripts are in the gitignored solutions/)
 ```
 
 ## Build conventions worth knowing

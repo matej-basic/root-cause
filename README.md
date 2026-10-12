@@ -13,8 +13,8 @@ environment for a university penetration-testing course.
 
 - **A web platform** (`platform/`): challenge catalog, GitHub sign-in, flag
   submission, and a points leaderboard.
-- **Self-contained challenges** (`CVE-*/`): each a vulnerable app with a
-  Dockerfile, a write-up of the bug, and an exploit or solve script.
+- **Self-contained challenges** (`labs/`): each a vulnerable app with a
+  Dockerfile, a `compose.yml`, and a write-up of the bug.
 - **A flagger sidecar and a CLI** (`sidecar/`, `cli/`): the pieces that fetch a
   per-run flag for a locally running challenge and wire it into the container.
 
@@ -43,19 +43,19 @@ account.
 
 | Slug | CVE | Vulnerability | Source |
 |---|---|---|---|
-| zgrep-rce | [CVE-2022-1271](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-1271) | Arbitrary file write and RCE through `zgrep` | `CVE-2022-1271/` |
-| spring4shell | [CVE-2022-22965](https://nvd.nist.gov/vuln/detail/cve-2022-22965) | Spring4Shell RCE (Spring MVC on a Tomcat WAR) | `CVE-2022-22965/` |
-| sha3-overflow | [CVE-2022-37454](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-37454) | SHA-3 (Keccak) buffer overflow | `CVE-2022-37454/` |
-| text4shell | [CVE-2022-42889](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-42889) | Text4Shell RCE in Apache Commons Text | `CVE-2022-42889/` |
+| zgrep-rce | [CVE-2022-1271](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-1271) | Arbitrary file write and RCE through `zgrep` | `labs/CVE-2022-1271/` |
+| spring4shell | [CVE-2022-22965](https://nvd.nist.gov/vuln/detail/cve-2022-22965) | Spring4Shell RCE (Spring MVC on a Tomcat WAR) | `labs/CVE-2022-22965/` |
+| sha3-overflow | [CVE-2022-37454](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-37454) | SHA-3 (Keccak) buffer overflow | `labs/CVE-2022-37454/` |
+| text4shell | [CVE-2022-42889](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-42889) | Text4Shell RCE in Apache Commons Text | `labs/CVE-2022-42889/` |
 
 Two more challenges live in the repo but are not in the live catalog yet.
 Dirty Pipe ([CVE-2022-0847](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-0847),
-a Linux kernel local privilege escalation in `CVE-2022-0847/`) is pending a
+a Linux kernel local privilege escalation in `labs/CVE-2022-0847/`) is pending a
 kernel test. The ERMS SQL injection challenge
 ([CVE-2021-44966](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44966),
-in `CVE-2021-44966/`) is kept for reference but dropped from the launch set.
+in `labs/CVE-2021-44966/`) is kept for reference but dropped from the launch set.
 
-Each `CVE-*/README.md` explains the bug and walks through the intended solution.
+Each `labs/CVE-*/README.md` explains the bug and walks through the intended solution.
 
 ## Running a challenge locally
 
