@@ -1,0 +1,11 @@
+{
+  "name": "jwt-weak-secret",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root Cause lab: JWT signed with a weak, crackable HS256 secret",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
