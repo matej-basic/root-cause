@@ -1,0 +1,35 @@
+import os
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# Seeded by the entrypoint from /flag/flag.txt before this process starts.
+FLAG = os.environ.get("FLAG_VALUE", "flag{missing}")
+
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == "/flag":
+            body = FLAG.encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def log_message(self, format, *args):
+        # Keep container logs quiet; this service is not meant to be noticed.
+        pass
+
+
+def main():
+    # Bound to loopback only: nothing outside this container can reach it
+    # directly. The published port is 8080 (the preview app); this one is
+    # never exposed in the Dockerfile or compose file.
+    server = HTTPServer(("127.0.0.1", 9000), Handler)
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()
