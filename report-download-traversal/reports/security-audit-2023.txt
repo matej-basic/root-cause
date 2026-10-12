@@ -1,0 +1,6 @@
+Meridian Analytics - Annual Security Audit (2023)
+===================================================
+
+Scope: perimeter network, staff workstations, customer portal.
+Findings: 2 low, 1 medium (patched), 0 high.
+Next review: 2024-Q4.

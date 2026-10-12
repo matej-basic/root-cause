@@ -1,0 +1,9 @@
+Meridian Analytics - Q3 Report
+===============================
+
+Revenue: 1,204,500 EUR
+New clients onboarded: 14
+Churned clients: 2
+Support tickets closed: 341
+
+Summary: a steady quarter, no outstanding incidents.
