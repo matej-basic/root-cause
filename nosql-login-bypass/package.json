@@ -1,0 +1,15 @@
+{
+  "name": "nosql-login-bypass",
+  "version": "1.0.0",
+  "description": "Root Cause lab: MongoDB operator injection auth bypass.",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "4.19.2",
+    "express-session": "1.18.0",
+    "mongodb": "6.8.0"
+  }
+}
