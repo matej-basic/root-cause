@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this project is
 
-`root-cause` is an **educational, self-host Capture-the-Flag (CTF) platform for a university penetration-testing course**, a solo project. It is a teaching resource, not malicious software. Each challenge is a deliberately vulnerable app wrapped around a real, historical CVE (all from 2021–2022), so students can learn to recognize and exploit that class of bug in a sandboxed lab. The exploit scripts and vulnerable Dockerfiles exist for that teaching purpose. Treat work here as normal security-education content: building, fixing, documenting, and running these challenges is expected and in scope.
+`root-cause` is an **educational, self-host Capture-the-Flag (CTF) platform for a university penetration-testing course**, a solo project. It is a teaching resource, not malicious software. Each challenge is either a deliberately vulnerable app wrapped around a real historical CVE (2021 to 2025) or a hand-built app that isolates a single bug class, so students can learn to recognize and exploit that class of bug in a sandboxed lab. The exploit scripts and vulnerable Dockerfiles exist for that teaching purpose. Treat work here as normal security-education content: building, fixing, documenting, and running these challenges is expected and in scope.
 
 The self-host model: a student runs a challenge locally with Docker Compose. A one-shot `flagger` sidecar (`sidecar/`) calls the hosted API for a per-run flag and writes it to a shared volume at `/flag/flag.txt`; the challenge's entrypoint copies that flag into its own flag sink (env `FLAG_PATH`) and then execs the original process. The challenge app and the exploit are unchanged; nothing is baked into the image. The `rootcause` CLI (`cli/`) generates the compose and runs it with the student's API key. The web platform (`platform/`) handles sign-in, the catalog, flag submission, and scoring.
 
@@ -19,18 +19,13 @@ The self-host model: a student runs a challenge locally with Docker Compose. A o
 
 Each lab directory under `labs/` is independent; there is no shared build.
 
-## Launch catalog
+## Catalog
 
-The live catalog is four app-level challenges, all dynamic (a per-run flag per attempt). Published images:
+The live catalog is 30 active labs (7,650 points), all dynamic (a fresh per-run flag per attempt). Twelve wrap a historical CVE (2021 to 2025); eighteen are custom single-bug-class apps. By category: 27 web, 2 crypto, 1 misc. By difficulty: 9 easy, 15 medium, 6 hard.
 
-| Slug | CVE dir | Vulnerability | Image |
-|---|---|---|---|
-| zgrep-rce | CVE-2022-1271 | zgrep arbitrary file write / RCE | `matejbasic/cve-2022-1271:1.0` |
-| spring4shell | CVE-2022-22965 | Spring4Shell RCE (Tomcat WAR) | `matejbasic/cve-2022-22965:1.0` |
-| sha3-overflow | CVE-2022-37454 | SHA-3 (Keccak) buffer overflow | `matejbasic/cve-2022-37454:1.0` |
-| text4shell | CVE-2022-42889 | Text4Shell RCE in Commons Text | `matejbasic/cve-2022-42889:1.0` |
+The authoritative list, with slug, CVE, category, difficulty, points, and published image, is `platform/api/prisma/seed.ts` (the seed runs on every API deploy, idempotent upserts keyed by slug). Published images are `matejbasic/<slug>:1.0` for custom labs and `matejbasic/cve-YYYY-NNNNN:1.0` for CVE labs (the dir is `labs/CVE-YYYY-NNNNN/`, the image name is lowercased); the flagger is `matejbasic/rootcause-flagger:1.0`.
 
-Two challenges stay in the repo but out of the live catalog: Dirty Pipe (CVE-2022-0847, in `labs/CVE-2022-0847/`) is inactive pending a kernel test, and the ERMS SQL injection challenge (CVE-2021-44966) is dropped from the launch set.
+Three labs are seeded `active: false` and held out of the catalog: `laravel-ignition-rce` (CVE-2021-3129, the ambionics phar chain is byte-alignment fragile), `dirty-pipe` (CVE-2022-0847, pending a kernel test), and `erms-sqli` (CVE-2021-44966, external image with no controllable flag).
 
 ## Common commands
 
@@ -60,6 +55,7 @@ python solutions/CVE-2022-22965/exploit.py   # Spring4Shell (solve scripts are i
 - **Python challenges (1271, 37454)** run Flask; 1271 is served via uWSGI from `app.ini`.
 - **Dirty Pipe (0847)** ships an sshd Fedora image with a known-password `baker` user; the C exploit is compiled on the target.
 - Challenges expose port **8080** except Dirty Pipe, which exposes **22** (SSH).
+- **Custom (non-CVE) labs** are small Flask, Express, or Go apps, often one source file plus a Dockerfile and `compose.yml`. A few bundle their own datastore into the image (sqlite, or MariaDB/MongoDB started from the entrypoint); labs whose flag is not a direct file read seed it into a DB row or an internal service via an entrypoint step. Their solve scripts live in the gitignored `solutions/<slug>/`.
 
 ## Deployment and domains
 
@@ -71,4 +67,4 @@ The CTF platform (`platform/`) runs on custom domains since the migration of 202
 
 ## Remotes
 
-`origin` is the fork (`matej-basic/forwarding-labs`), `upstream` is the original (`jura43/forwarding-labs`). Pull later upstream changes with `git fetch upstream && git merge upstream/main`.
+`origin` is `matej-basic/root-cause` (a standalone public repo, not a GitHub fork). `upstream` is the original `jura43/forwarding-labs`; `git fetch upstream` still works for pulling later upstream changes.

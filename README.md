@@ -1,10 +1,10 @@
 # Root Cause
 
-A hosted Capture-the-Flag platform plus a set of deliberately vulnerable apps,
-each built around a real historical CVE from 2021-2022. You run a challenge on
-your own machine, exploit the target, recover a flag, and submit it to the
-platform, which handles sign-in, scoring, and a leaderboard. Built as the lab
-environment for a university penetration-testing course.
+A hosted Capture-the-Flag platform with 30 deliberately vulnerable labs: some
+wrap a real historical CVE, others are hand-built apps that isolate a single bug
+class. You run a lab on your own machine, exploit the target, recover a flag, and
+submit it to the platform, which handles sign-in, scoring, and a leaderboard.
+Built as the lab environment for a university penetration-testing course.
 
 - Play: https://root-cause.matejbasic.com
 - API: https://root-cause-api.matejbasic.com
@@ -36,26 +36,61 @@ The platform is a two-service app, deployed and live:
 
 ## The challenges
 
-The launch set is four app-level challenges, each wrapping a real CVE in a
-minimal, runnable target. Every one of these mints a fresh flag per run (see
-"Running a challenge locally" below), so the flag you submit is tied to your
-account.
+The catalog is 30 runnable labs worth 7,650 points. Twelve wrap a real historical
+CVE (2021 to 2025); eighteen are hand-built apps that isolate a single bug class
+from first principles. Every lab mints a fresh flag per run (see "Running a
+challenge locally" below), so the flag you submit is tied to your account.
+Difficulty runs easy (9), medium (15) and hard (6); most are web, with two crypto
+and one misc. Each lab lives in `labs/<name>/`, with its write-up in that dir's
+`README.md`.
 
-| Slug | CVE | Vulnerability | Source |
+### Historical CVE labs
+
+| Slug | CVE | Vulnerability | Difficulty |
 |---|---|---|---|
-| zgrep-rce | [CVE-2022-1271](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-1271) | Arbitrary file write and RCE through `zgrep` | `labs/CVE-2022-1271/` |
-| spring4shell | [CVE-2022-22965](https://nvd.nist.gov/vuln/detail/cve-2022-22965) | Spring4Shell RCE (Spring MVC on a Tomcat WAR) | `labs/CVE-2022-22965/` |
-| sha3-overflow | [CVE-2022-37454](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-37454) | SHA-3 (Keccak) buffer overflow | `labs/CVE-2022-37454/` |
-| text4shell | [CVE-2022-42889](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-42889) | Text4Shell RCE in Apache Commons Text | `labs/CVE-2022-42889/` |
+| grafana-traversal | [CVE-2021-43798](https://nvd.nist.gov/vuln/detail/CVE-2021-43798) | Grafana plugin path traversal | easy |
+| vite-fs-traversal | [CVE-2025-30208](https://nvd.nist.gov/vuln/detail/CVE-2025-30208) | Vite dev-server arbitrary file read | easy |
+| aiohttp-traversal | [CVE-2024-23334](https://nvd.nist.gov/vuln/detail/CVE-2024-23334) | aiohttp static-route path traversal | easy |
+| whistle-traversal | [CVE-2025-5880](https://nvd.nist.gov/vuln/detail/CVE-2025-5880) | Whistle unauthenticated file read | easy |
+| zgrep-rce | [CVE-2022-1271](https://nvd.nist.gov/vuln/detail/CVE-2022-1271) | zgrep arbitrary file write to RCE | medium |
+| sha3-overflow | [CVE-2022-37454](https://nvd.nist.gov/vuln/detail/CVE-2022-37454) | SHA-3 (Keccak) buffer overflow | medium |
+| text4shell | [CVE-2022-42889](https://nvd.nist.gov/vuln/detail/CVE-2022-42889) | Apache Commons Text interpolation RCE | medium |
+| spring-cloud-function-spel | [CVE-2022-22963](https://nvd.nist.gov/vuln/detail/CVE-2022-22963) | Spring Cloud Function SpEL injection RCE | medium |
+| langflow-rce | [CVE-2025-3248](https://nvd.nist.gov/vuln/detail/CVE-2025-3248) | Langflow unauthenticated RCE | medium |
+| xwiki-solr-rce | [CVE-2025-24893](https://nvd.nist.gov/vuln/detail/CVE-2025-24893) | XWiki SolrSearch template-injection RCE | medium |
+| request-baskets-ssrf | [CVE-2023-27163](https://nvd.nist.gov/vuln/detail/CVE-2023-27163) | request-baskets forward_url SSRF | medium |
+| spring4shell | [CVE-2022-22965](https://nvd.nist.gov/vuln/detail/CVE-2022-22965) | Spring MVC data-binding RCE on Tomcat | hard |
 
-Two more challenges live in the repo but are not in the live catalog yet.
-Dirty Pipe ([CVE-2022-0847](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-0847),
-a Linux kernel local privilege escalation in `labs/CVE-2022-0847/`) is pending a
-kernel test. The ERMS SQL injection challenge
-([CVE-2021-44966](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44966),
-in `labs/CVE-2021-44966/`) is kept for reference but dropped from the launch set.
+### Custom bug-class labs
 
-Each `labs/CVE-*/README.md` explains the bug and walks through the intended solution.
+| Slug | Bug class | Difficulty |
+|---|---|---|
+| invoice-idor | IDOR / missing object-level authorization | easy |
+| report-download-traversal | app-logic path traversal | easy |
+| login-sqli | SQL injection auth bypass and UNION exfiltration | easy |
+| role-mass-assignment | mass-assignment privilege escalation | easy |
+| trusted-header-admin | broken access control via a trusted header | easy |
+| jwt-alg-none | JWT alg:none acceptance | medium |
+| jwt-weak-secret | crackable HS256 signing secret | medium |
+| nosql-login-bypass | NoSQL operator injection | medium |
+| graphql-idor | GraphQL introspection plus IDOR | medium |
+| xxe-invoice-import | XML external entity file read | medium |
+| linkpreview-ssrf | SSRF to a loopback-only service | medium |
+| negative-quantity-checkout | business-logic flaw (negative quantity) | medium |
+| predictable-reset-token | predictable password-reset token | medium |
+| blind-sqli-tracker | boolean blind SQL injection | hard |
+| predictable-session-token | weak-PRNG session token | hard |
+| giftcard-race | race condition / TOCTOU double-redeem | hard |
+| config-merge-proto | prototype pollution privilege escalation | hard |
+| ecb-cookie-cutpaste | AES-ECB cut-and-paste | hard |
+
+A few labs live in the repo but are held out of the live catalog: Dirty Pipe
+([CVE-2022-0847](https://nvd.nist.gov/vuln/detail/CVE-2022-0847), a kernel privilege
+escalation) pending a kernel test, Laravel Ignition RCE
+([CVE-2021-3129](https://nvd.nist.gov/vuln/detail/CVE-2021-3129)) pending an
+exploit-reliability fix, and an ERMS SQL injection challenge
+([CVE-2021-44966](https://nvd.nist.gov/vuln/detail/CVE-2021-44966)) kept for
+reference. Each lab's `README.md` explains the bug and the intended approach.
 
 ## Running a challenge locally
 
@@ -89,14 +124,7 @@ to your account, so a flag from someone else's run will not score.
 ## Scope and honesty
 
 This is a teaching resource for a penetration-testing course, not a live
-competition. Each live challenge issues a per-run flag tied to your account, so
-a solve means you actually ran and exploited the target. The four launch
-challenges are built and in the catalog; a handful of further CVEs were scoped
-for the course but not built:
-
-- [CVE-2022-32275](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-32275),
-  [CVE-2022-35861](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-35861),
-  [CVE-2022-41323](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-41323),
-  [CVE-2021-44026](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-44026),
-  [CVE-2021-39180](https://nvd.nist.gov/vuln/detail/CVE-2021-39180),
-  [CVE-2022-21907](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-21907).
+competition. Each lab issues a per-run flag tied to your account, so a solve
+means you actually ran and exploited the target. All 30 labs above are built and
+in the live catalog. The set grows over time, and a batch of harder
+remote-code-execution labs is staged for a later release.
