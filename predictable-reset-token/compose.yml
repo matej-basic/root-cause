@@ -1,0 +1,23 @@
+services:
+  flagger:
+    image: matejbasic/rootcause-flagger:1.0
+    environment:
+      ROOTCAUSE_API_URL: https://root-cause-api.matejbasic.com
+      ROOTCAUSE_API_KEY: ${ROOTCAUSE_API_KEY}
+      ROOTCAUSE_CHALLENGE: predictable-reset-token
+      FLAG_PATH: /flag/flag.txt
+    volumes:
+      - flag:/flag
+  challenge:
+    image: matejbasic/predictable-reset-token:1.0
+    depends_on:
+      flagger:
+        condition: service_completed_successfully
+    environment:
+      FLAG_PATH: /flag/flag.txt
+    volumes:
+      - flag:/flag
+    ports:
+      - "8080:8080"
+volumes:
+  flag:
