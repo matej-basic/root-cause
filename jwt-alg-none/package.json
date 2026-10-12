@@ -1,0 +1,11 @@
+{
+  "name": "jwt-alg-none",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root Cause lab: JWT algorithm-confusion to none",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.2",
+    "jsonwebtoken": "0.4.0"
+  }
+}
