@@ -3,6 +3,7 @@ import { Flag, Search, Terminal, Trophy } from "lucide-react";
 import { SignInButton } from "@/components/SignInButton";
 import { ChallengePreview } from "@/components/ChallengePreview";
 import { LeaderboardTeaser } from "@/components/LeaderboardTeaser";
+import { FALLBACK_CHALLENGES } from "@/lib/challenges-fallback";
 
 function ExploitCard() {
   return (
@@ -63,13 +64,39 @@ const STEPS = [
   },
 ];
 
-const STATS = [
-  { v: "6", l: "challenges" },
-  { v: "4", l: "categories" },
-  { v: "1,800", l: "points on offer" },
-];
+const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
 
-export default function LandingPage() {
+// Live catalog counts for the hero stats. Falls back to the built-in seed list
+// when the API is unreachable, so the homepage never shows a broken count.
+async function getCatalogStats() {
+  let catalog: { category: string; points: number }[] = FALLBACK_CHALLENGES;
+  try {
+    const res = await fetch(`${API_URL}/challenges`, { next: { revalidate: 60 } });
+    if (res.ok) {
+      const data = (await res.json()) as {
+        challenges?: { category: string; points: number }[];
+      };
+      if (Array.isArray(data.challenges) && data.challenges.length > 0) {
+        catalog = data.challenges;
+      }
+    }
+  } catch {
+    // keep the fallback list
+  }
+  return {
+    challenges: catalog.length,
+    categories: new Set(catalog.map((c) => c.category)).size,
+    points: catalog.reduce((sum, c) => sum + (c.points ?? 0), 0),
+  };
+}
+
+export default async function LandingPage() {
+  const counts = await getCatalogStats();
+  const stats = [
+    { v: String(counts.challenges), l: counts.challenges === 1 ? "challenge" : "challenges" },
+    { v: String(counts.categories), l: counts.categories === 1 ? "category" : "categories" },
+    { v: counts.points.toLocaleString("en-US"), l: "points on offer" },
+  ];
   return (
     <div className="mx-auto max-w-6xl px-4">
       {/* Hero */}
@@ -98,7 +125,7 @@ export default function LandingPage() {
             </Link>
           </div>
           <dl className="mt-8 flex flex-wrap gap-8">
-            {STATS.map((s) => (
+            {stats.map((s) => (
               <div key={s.l}>
                 <dt className="sr-only">{s.l}</dt>
                 <dd className="font-display text-2xl font-bold">{s.v}</dd>
