@@ -21,7 +21,7 @@ Each lab directory under `labs/` is independent; there is no shared build.
 
 ## Catalog
 
-The live catalog is 30 active labs (7,650 points), all dynamic (a fresh per-run flag per attempt). Twelve wrap a historical CVE (2021 to 2025); eighteen are custom single-bug-class apps. By category: 27 web, 2 crypto, 1 misc. By difficulty: 9 easy, 15 medium, 6 hard.
+The live catalog is 46 active labs (12,050 points), all dynamic (a fresh per-run flag per attempt). Twenty wrap a historical CVE (2021 to 2026); twenty-six are custom single-bug-class apps. By category: 41 web, 4 crypto, 1 misc. By difficulty: 13 easy, 24 medium, 9 hard.
 
 The authoritative list, with slug, CVE, category, difficulty, points, and published image, is `platform/api/prisma/seed.ts` (the seed runs on every API deploy, idempotent upserts keyed by slug). Published images are `matejbasic/<slug>:1.0` for custom labs and `matejbasic/cve-YYYY-NNNNN:1.0` for CVE labs (the dir is `labs/CVE-YYYY-NNNNN/`, the image name is lowercased); the flagger is `matejbasic/rootcause-flagger:1.0`.
 
