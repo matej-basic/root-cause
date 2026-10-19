@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Inter, JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { OG_BASE, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 const spaceGrotesk = Space_Grotesk({
@@ -18,12 +20,31 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Root Cause · hands-on CTF against real CVEs",
-    template: "%s · Root Cause",
+    default: SITE_TITLE,
+    template: `%s · ${SITE_NAME}`,
   },
-  description:
-    "A hands-on capture-the-flag built on real historical CVEs. Each challenge is a deliberately vulnerable app in its own sandboxed lab. Exploit the bug, submit the flag, climb the leaderboard.",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "CTF",
+    "capture the flag",
+    "penetration testing",
+    "web security labs",
+    "CVE",
+    "exploit practice",
+    "vulnerable apps",
+    "Docker labs",
+  ],
+  openGraph: { ...OG_BASE, title: SITE_TITLE, description: SITE_DESCRIPTION },
+  // Title, description and image autofill from the resolved openGraph.
+  twitter: { card: "summary_large_image" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0b0f14",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -38,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <main className="flex-1">{children}</main>
           <Footer />
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );

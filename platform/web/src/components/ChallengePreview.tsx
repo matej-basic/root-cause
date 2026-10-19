@@ -5,15 +5,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getChallenges } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { FALLBACK_CHALLENGES } from "@/lib/challenges-fallback";
 import type { ChallengeListItem } from "@/lib/types";
 import { ChallengeCard } from "./ChallengeCard";
 
-// Live preview grid. Tries the API, falls back to the built-in six so the
-// landing page always shows real challenges even when the backend is cold.
-export function ChallengePreview() {
+// Live preview grid. The server pre-renders `initial`; the client refetches with
+// the user's token for solved state.
+export function ChallengePreview({ initial }: { initial: ChallengeListItem[] }) {
   const { solvedChallengeIds } = useAuth();
-  const [challenges, setChallenges] = useState<ChallengeListItem[]>(FALLBACK_CHALLENGES);
+  const [challenges, setChallenges] = useState<ChallengeListItem[]>(initial);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

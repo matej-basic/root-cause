@@ -1,68 +1,12 @@
 import type { ChallengeDetail } from "./types";
 
-// Built-in copy of the six seed challenges (see platform/API_CONTRACT.md).
+// Built-in copy of four active seed challenges (see platform/API_CONTRACT.md).
 // Used so the landing page and challenge pages still render real content when
 // the API is cold, down, or unreachable. The live API is always preferred;
 // this is only a fallback. Descriptions are drawn from each CVE-*/README.md and
 // written for a student about to attempt the challenge, not as full exploits.
 
 export const FALLBACK_CHALLENGES: ChallengeDetail[] = [
-  {
-    id: "fallback-erms-sqli",
-    slug: "erms-sqli",
-    title: "ERMS SQL injection auth bypass",
-    cveId: "CVE-2021-44966",
-    category: "web",
-    difficulty: "easy",
-    points: 100,
-    order: 1,
-    active: true,
-    solveCount: 0,
-    solved: false,
-    summary:
-      "Bypass the login of a PHP employee-records app with a classic SQL injection and read what only an admin should see.",
-    description: `## The bug
-
-The Employee Record Management System 1.2 (PHPGurukul) builds its login query by pasting your input straight into SQL. The username field is never escaped, so a crafted value changes what the query *means* instead of just filling in a value.
-
-## Reaching it
-
-The login form lives at \`index.php\`. Send a username that closes the string and comments out the rest of the check, for example:
-
-\`\`\`sql
-marko' or 1=1#
-\`\`\`
-
-Once you are logged in as an administrator, browse the employee records. One employee's description holds what you came for.
-
-## Note
-
-This one runs from an external image, so automated flag submission may be turned off. Treat it as a close look at how a single unescaped field hands over an admin session.`,
-  },
-  {
-    id: "fallback-dirty-pipe",
-    slug: "dirty-pipe",
-    title: "Dirty Pipe",
-    cveId: "CVE-2022-0847",
-    category: "pwn",
-    difficulty: "hard",
-    points: 500,
-    order: 2,
-    active: true,
-    solveCount: 0,
-    solved: false,
-    summary:
-      "Abuse a Linux kernel page-cache flaw to overwrite a file you should only be able to read, then escalate to root.",
-    description: `## The bug
-
-Dirty Pipe (CVE-2022-0847) is a flaw in how the Linux kernel manages pipe buffers. A missing flag reset lets an unprivileged user push bytes into the page cache of a file they can only read. The write skips the usual permission check, so read-only files such as \`/etc/passwd\` can be rewritten in memory and trusted by the system.
-
-## Reaching it
-
-You get an SSH shell as the low-privileged user \`baker\`. The host runs a kernel in the vulnerable range. Compile the provided C exploit on the target, point it at a root-owned file, and use the overwrite to hand yourself an elevated shell.
-
-The flag is waiting once you are root.`,
-  },
   {
     id: "fallback-zgrep-rce",
     slug: "zgrep-rce",

@@ -1,10 +1,15 @@
+import type { Metadata } from "next";
+import { OG_BASE, OG_DEFAULT_IMAGE } from "@/lib/site";
 import Link from "next/link";
 import { Terminal } from "lucide-react";
 import { CopyButton } from "@/components/CopyButton";
 
-export const metadata = {
-  title: "Install the CLI — Root Cause",
-  description: "Download and install the rootcause CLI to run challenges locally.",
+export const metadata: Metadata = {
+  title: "Install the rootcause CLI",
+  description:
+    "Download the rootcause CLI for macOS, Linux or Windows and run any Root Cause CTF lab locally with Docker in one command.",
+  alternates: { canonical: "/cli" },
+  openGraph: { ...OG_BASE, url: "/cli", title: "Install the rootcause CLI", images: [OG_DEFAULT_IMAGE] },
 };
 
 const RELEASES = "https://github.com/matej-basic/root-cause/releases/latest";
@@ -22,7 +27,7 @@ const CODE =
 
 export default function CliPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <div className="mx-auto max-w-2xl px-4 py-12">
       <h1 className="flex items-center gap-2 font-display text-2xl font-semibold">
         <Terminal className="h-5 w-5 text-accent-strong" aria-hidden="true" /> Install the CLI
       </h1>
@@ -104,6 +109,6 @@ export default function CliPage() {
           .
         </p>
       </section>
-    </main>
+    </div>
   );
 }

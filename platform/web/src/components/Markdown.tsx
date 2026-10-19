@@ -9,7 +9,12 @@ export function Markdown({ content }: { content: string }) {
     <div className="md">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
+        // Descriptions open with "# Title"; the page already has the h1, so
+        // shift markdown headings down one level.
         components={{
+          h1: (props) => <h2 {...props} />,
+          h2: (props) => <h3 {...props} />,
+          h3: (props) => <h4 {...props} />,
           a: ({ href, children, ...props }) => (
             <a href={href} target="_blank" rel="noopener noreferrer" {...props}>
               {children}
